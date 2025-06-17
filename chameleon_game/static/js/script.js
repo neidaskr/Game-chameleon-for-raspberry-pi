@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     socket.on('enable_start_button', () => {
+        console.log("Received enable_start_button");
         if (startGameButton) {
             startGameButton.disabled = false;
         }

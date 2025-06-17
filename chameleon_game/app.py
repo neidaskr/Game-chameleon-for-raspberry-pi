@@ -19,8 +19,12 @@ def index():
 @app.route('/new_game')
 def new_game():
     game_id = generate_game_pin()
-    games[game_id] = {'players': [], 'word': None, 'chameleon': None, 'clues': [], 'votes': {}, 'game_started': False, 'host': session.get('username')}
-    return render_template('index.html', game_id=game_id)
+    session['username'] = request.args.get('username', 'Host')  # Get username from request
+    games[game_id] = {'players': [], 'word': None, 'chameleon': None, 'clues': [], 'votes': {}, 'game_started': False, 'host': session['username']}
+    print(f"New game created with PIN: {game_id}, Host: {session['username']}")
+    print(f"Session: {session}")
+    print(f"Games: {games}")
+    return redirect(url_for('game')) # Redirect to game page after creating game
 
 @socketio.on('join')
 def handle_join(data):
@@ -41,6 +45,7 @@ def handle_join(data):
     
     # Check if enough players have joined to enable the start button
     if len(games[game_id]['players']) >= 3 and not games[game_id]['game_started'] and games[game_id]['host'] == session.get('username'):
+        print("Emitting enable_start_button")  # Add this line
         emit('enable_start_button', room=game_id)
 
 @app.route('/game')
