@@ -19,7 +19,7 @@ def index():
 @app.route('/new_game')
 def new_game():
     game_id = generate_game_pin()
-    games[game_id] = {'players': [], 'word': None, 'chameleon': None, 'clues': [], 'votes': {}, 'game_started': False}
+    games[game_id] = {'players': [], 'word': None, 'chameleon': None, 'clues': [], 'votes': {}, 'game_started': False, 'host': session.get('username')}
     return render_template('index.html', game_id=game_id)
 
 @socketio.on('join')
@@ -40,7 +40,7 @@ def handle_join(data):
         emit('player_joined', {'players': games[game_id]['players']}, room=game_id)
     
     # Check if enough players have joined to enable the start button
-    if len(games[game_id]['players']) >= 3 and not games[game_id]['game_started']:
+    if len(games[game_id]['players']) >= 3 and not games[game_id]['game_started'] and games[game_id]['host'] == session.get('username'):
         emit('enable_start_button', room=game_id)
 
 @app.route('/game')
@@ -53,6 +53,10 @@ def start_game():
 
     if len(games[game_id]['players']) < 3:
         emit('not_enough_players', room=game_id)
+        return
+    
+    if games[game_id]['host'] != session.get('username'):
+        emit('not_host', room=game_id)
         return
 
     words = ['apple', 'banana', 'cherry']  # Example word list

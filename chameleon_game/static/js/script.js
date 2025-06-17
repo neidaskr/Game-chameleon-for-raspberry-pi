@@ -82,4 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('not_enough_players', () => {
         alert("Not enough players to start the game!");
     });
+    
+    socket.on('not_host', () => {
+        alert("You are not the host of this game!");
+    });
 });
