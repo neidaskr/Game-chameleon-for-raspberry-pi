@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chameleon Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div id="game-container">
+        <h1>Chameleon Game</h1>
+        <div id="game-info">
+            <p id="current-word">Current Word: <span id="word"></span></p>
+            <p id="player-role">Your Role: <span id="role"></span></p>
+        </div>
+        <div id="clue-section">
+            <textarea id="clue-input" placeholder="Enter your clue here..." rows="3"></textarea>
+            <button id="submit-clue">Submit Clue</button>
+        </div>
+        <div id="clue-list">
+            <h2>Clues Given:</h2>
+            <ul id="clue-display"></ul>
+        </div>
+        <div id="vote-section" style="display: none;">
+            <h2>Vote for the Chameleon</h2>
+            <ul id="player-list"></ul>
+            <button id="submit-vote">Submit Vote</button>
+        </div>
+        <div id="result-section" style="display: none;">
+            <h2>Results</h2>
+            <p id="result-message"></p>
+            <button id="restart-game">Restart Game</button>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
