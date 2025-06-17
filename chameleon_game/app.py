@@ -1,6 +1,6 @@
-from flask import Flask, render_template, request, session
-from flask_socketio import SocketIO, emit
 import random
+from flask import Flask, render_template, request, session, redirect, url_for
+from flask_socketio import SocketIO, emit, join_room
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -8,6 +8,9 @@ socketio = SocketIO(app)
 
 # Game state
 games = {}
+
+def generate_game_id():
+    return ''.join(random.choices('ABCDEFGHIJKLMNPQRSTUVWXYZ123456789', k=6))
 
 @app.route('/')
 def index():
@@ -17,15 +20,18 @@ def index():
 def handle_join(data):
     username = data['username']
     game_id = data['game_id']
-    
+
     if game_id not in games:
-        games[game_id] = {'players': [], 'word': '', 'chameleon': '', 'clues': [], 'votes': {}}
-    
-    games[game_id]['players'].append(username)
-    session['username'] = username
-    session['game_id'] = game_id
-    
-    emit('player_joined', {'username': username}, broadcast=True)
+        # Game does not exist, create it
+        games[game_id] = {'players': [], 'word': None, 'chameleon': None, 'clues': [], 'votes': {}}
+
+    if username not in games[game_id]['players']:
+        games[game_id]['players'].append(username)
+        session['username'] = username
+        session['game_id'] = game_id
+        join_room(game_id)
+        print(f"{username} has joined room {game_id}")
+        emit('player_joined', {'players': games[game_id]['players']}, room=game_id)
 
 @app.route('/game')
 def game():
@@ -33,43 +39,38 @@ def game():
 
 @socketio.on('start_game')
 def start_game(data):
-    game_id = data['game_id']
+    game_id = session['game_id']
     words = ['apple', 'banana', 'cherry']  # Example word list
     word = random.choice(words)
-    
+
     games[game_id]['word'] = word
     chameleon_index = random.randint(0, len(games[game_id]['players']) - 1)
     games[game_id]['chameleon'] = games[game_id]['players'][chameleon_index]
-    
-    emit('game_started', {'word': word, 'chameleon': games[game_id]['chameleon']}, broadcast=True)
+
+    emit('game_started', {'word': word, 'chameleon': games[game_id]['chameleon']}, room=game_id)
 
 @socketio.on('submit_clue')
 def submit_clue(data):
     game_id = session['game_id']
     clue = data['clue']
     username = session['username']
-    
+
     games[game_id]['clues'].append({'username': username, 'clue': clue})
-    emit('new_clue', {'username': username, 'clue': clue}, broadcast=True)
+    emit('new_clue', {'username': username, 'clue': clue}, room=game_id)
 
 @socketio.on('vote')
 def vote(data):
     game_id = session['game_id']
     voted_username = data['voted_username']
     username = session['username']
-    
+
     games[game_id]['votes'][username] = voted_username
-    emit('new_vote', {'voted_username': voted_username}, broadcast=True)
+    emit('new_vote', {'voted_username': voted_username}, room=game_id)
 
 @socketio.on('end_game')
 def end_game(data):
     game_id = session['game_id']
-    chameleon = games[game_id]['chameleon']
-    votes = games[game_id]['votes']
-    
-    # Determine the result
-    # Logic to determine if the chameleon was guessed correctly
-    emit('game_ended', {'chameleon': chameleon, 'votes': votes}, broadcast=True)
+
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
