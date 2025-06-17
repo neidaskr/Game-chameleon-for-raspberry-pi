@@ -67,9 +67,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-     if (startGameButton) {
+    if (startGameButton) {
         startGameButton.addEventListener('click', () => {
             socket.emit('start_game');
         });
     }
+
+    socket.on('enable_start_button', () => {
+        if (startGameButton) {
+            startGameButton.disabled = false;
+        }
+    });
+
+    socket.on('not_enough_players', () => {
+        alert("Not enough players to start the game!");
+    });
 });

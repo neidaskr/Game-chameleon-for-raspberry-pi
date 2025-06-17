@@ -19,7 +19,7 @@ def index():
 @app.route('/new_game')
 def new_game():
     game_id = generate_game_pin()
-    games[game_id] = {'players': [], 'word': None, 'chameleon': None, 'clues': [], 'votes': {}}
+    games[game_id] = {'players': [], 'word': None, 'chameleon': None, 'clues': [], 'votes': {}, 'game_started': False}
     return render_template('index.html', game_id=game_id)
 
 @socketio.on('join')
@@ -38,20 +38,30 @@ def handle_join(data):
         join_room(game_id)
         print(f"{username} has joined room {game_id}")
         emit('player_joined', {'players': games[game_id]['players']}, room=game_id)
+    
+    # Check if enough players have joined to enable the start button
+    if len(games[game_id]['players']) >= 3 and not games[game_id]['game_started']:
+        emit('enable_start_button', room=game_id)
 
 @app.route('/game')
 def game():
     return render_template('game.html')
 
 @socketio.on('start_game')
-def start_game(data):
+def start_game():
     game_id = session['game_id']
+
+    if len(games[game_id]['players']) < 3:
+        emit('not_enough_players', room=game_id)
+        return
+
     words = ['apple', 'banana', 'cherry']  # Example word list
     word = random.choice(words)
 
     games[game_id]['word'] = word
     chameleon_index = random.randint(0, len(games[game_id]['players']) - 1)
     games[game_id]['chameleon'] = games[game_id]['players'][chameleon_index]
+    games[game_id]['game_started'] = True
 
     emit('game_started', {'word': word, 'chameleon': games[game_id]['chameleon']}, room=game_id)
 
@@ -76,7 +86,6 @@ def vote(data):
 @socketio.on('end_game')
 def end_game(data):
     game_id = session['game_id']
-
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
