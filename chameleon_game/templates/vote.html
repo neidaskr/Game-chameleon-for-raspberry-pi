@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote - Chameleon Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Vote for the Chameleon</h1>
+        <p>Players, please vote on who you think is the chameleon:</p>
+        <ul id="player-list">
+            <!-- Player list will be populated here by JavaScript -->
+        </ul>
+        <button id="submit-vote">Submit Vote</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        const socket = io();
+
+        // Handle incoming player list
+        socket.on('update_player_list', function(players) {
+            const playerList = document.getElementById('player-list');
+            playerList.innerHTML = '';
+            players.forEach(player => {
+                const li = document.createElement('li');
+                li.textContent = player.name;
+                li.setAttribute('data-id', player.id);
+                playerList.appendChild(li);
+            });
+        });
+
+        // Handle vote submission
+        document.getElementById('submit-vote').addEventListener('click', function() {
+            const selectedPlayer = document.querySelector('#player-list li.selected');
+            if (selectedPlayer) {
+                const playerId = selectedPlayer.getAttribute('data-id');
+                socket.emit('submit_vote', playerId);
+            } else {
+                alert('Please select a player to vote for.');
+            }
+        });
+
+        // Handle player selection
+        document.getElementById('player-list').addEventListener('click', function(event) {
+            if (event.target.tagName === 'LI') {
+                const selected = document.querySelector('#player-list li.selected');
+                if (selected) {
+                    selected.classList.remove('selected');
+                }
+                event.target.classList.add('selected');
+            }
+        });
+    </script>
+</body>
+</html>
