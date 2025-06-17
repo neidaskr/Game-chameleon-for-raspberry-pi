@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const voteButton = document.getElementById('voteButton');
     const resultsScreen = document.getElementById('resultsScreen');
     const playerList = document.getElementById('playerList'); // Get the player list element
+    const startGameButton = document.getElementById('startGameButton');
 
     let playerName;
     let gameId;
@@ -31,9 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updatePlayerList(data.players);
     });
 
-    socket.on('game_start', (data) => {
-        isChameleon = data.isChameleon;
-        // Update UI for game start
+    socket.on('game_started', (data) => {
+        isChameleon = data.chameleon === playerName;
+        document.getElementById('word').innerText = data.word;
+        document.getElementById('role').innerText = isChameleon ? 'Chameleon' : 'Not Chameleon';
     });
 
     clueButton.addEventListener('click', () => {
@@ -62,6 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             li.textContent = player;
             playerList.appendChild(li);
+        });
+    }
+
+     if (startGameButton) {
+        startGameButton.addEventListener('click', () => {
+            socket.emit('start_game');
         });
     }
 });

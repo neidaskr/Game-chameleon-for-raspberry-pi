@@ -9,12 +9,18 @@ socketio = SocketIO(app)
 # Game state
 games = {}
 
-def generate_game_id():
-    return ''.join(random.choices('ABCDEFGHIJKLMNPQRSTUVWXYZ123456789', k=6))
+def generate_game_pin():
+    return str(random.randint(1000, 9999))  # 4-digit PIN
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/new_game')
+def new_game():
+    game_id = generate_game_pin()
+    games[game_id] = {'players': [], 'word': None, 'chameleon': None, 'clues': [], 'votes': {}}
+    return render_template('index.html', game_id=game_id)
 
 @socketio.on('join')
 def handle_join(data):
@@ -22,8 +28,8 @@ def handle_join(data):
     game_id = data['game_id']
 
     if game_id not in games:
-        # Game does not exist, create it
-        games[game_id] = {'players': [], 'word': None, 'chameleon': None, 'clues': [], 'votes': {}}
+        emit('join_failed', {'message': 'Invalid game PIN'})
+        return
 
     if username not in games[game_id]['players']:
         games[game_id]['players'].append(username)

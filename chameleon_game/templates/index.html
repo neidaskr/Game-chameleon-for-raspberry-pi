@@ -9,8 +9,14 @@
 <body>
     <div class="container">
         <h1>Welcome to the Chameleon Game!</h1>
+        {% if game_id %}
+            <h2>Game PIN: {{ game_id }}</h2>
+        {% else %}
+            <a href="/new_game">Create New Game</a>
+        {% endif %}
         <div id="lobby">
-            <input type="text" id="playerName" placeholder="Enter your name" />
+            <input type="text" id="nameInput" placeholder="Enter your name" />
+            <input type="text" id="gameIdInput" placeholder="Enter Game PIN" />
             <button id="joinButton">Join Game</button>
         </div>
         <div id="playersList">
@@ -23,4 +29,3 @@
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
-<input type="text" id="gameIdInput" placeholder="Enter Game ID">
