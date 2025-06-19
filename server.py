@@ -17,12 +17,22 @@ def on_join(data):
     username = data['name']
     if username not in players:
         players.append(username)
-        emit('player_list', {'players': players}, broadcast=True)
+    # Reset ready_players every time someone joins
+    ready_players.clear()
+    emit('player_list', {'players': players}, broadcast=True)
+
+@socketio.on('disconnect')
+def on_disconnect():
+    # Remove player from players and ready_players
+    # Note: This requires tracking username by session, so for now, remove by sid if possible
+    # But since we only have names, we can't reliably remove on disconnect
+    pass  # For a robust solution, track players by sid and name
+    emit('player_list', {'players': players}, broadcast=True)
 
 @socketio.on('player_ready')
 def on_ready(data):
     ready_players.add(data['name'])
-    if len(ready_players) == len(players):
+    if len(ready_players) == len(players) and len(players) > 0:
         emit('start_game', broadcast=True)
 
 if __name__ == '__main__':

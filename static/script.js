@@ -29,6 +29,8 @@ function startGame() {
 }
 
 socket.on("start_game", () => {
+    document.getElementById("startButton").disabled = true;
+    document.getElementById("startButton").textContent = "Game Starting...";
     alert("Game is starting!");
     // Future: redirect to game screen
 });
