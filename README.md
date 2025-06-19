@@ -1,4 +1,5 @@
 # Chameleon Game
+NOT WORKING 🚫 
 
 ## Overview
 Chameleon is a web-based multiplayer party game where players try to identify the "chameleon" among them. The chameleon does not know the secret word, while the other players give clues to help them guess without revealing the word. The game is designed to be played on mobile devices and is hosted on a Raspberry Pi using Flask and Flask-SocketIO.
