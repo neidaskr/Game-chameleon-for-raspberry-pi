@@ -1,43 +1,34 @@
 const socket = io();
-let mySid = null;
-let isHost = false;
+let myName = "";
 
-const joinSection = document.getElementById('join-section');
-const lobbySection = document.getElementById('lobby-section');
-const nameInput = document.getElementById('name-input');
-const joinBtn = document.getElementById('join-btn');
-const playersList = document.getElementById('players-list');
-const startBtn = document.getElementById('start-btn');
+function joinGame() {
+    const nameInput = document.getElementById("nameInput");
+    myName = nameInput.value.trim();
+    if (myName === "") return alert("Please enter a name");
 
-joinBtn.onclick = () => {
-    const name = nameInput.value.trim();
-    if (name.length > 0) {
-        socket.emit('join', { name });
-        joinSection.style.display = 'none';
-        lobbySection.style.display = '';
-    }
-};
+    socket.emit("join", { name: myName });
 
-socket.on('connect', () => {
-    mySid = socket.id;
-});
+    document.getElementById("joinScreen").style.display = "none";
+    document.getElementById("lobby").style.display = "block";
+}
 
-socket.on('lobby_update', data => {
-    playersList.innerHTML = '';
-    data.players.forEach((player, idx) => {
-        const li = document.createElement('li');
-        li.textContent = player + (idx === 0 ? " (Host)" : "");
-        playersList.appendChild(li);
+socket.on("player_list", data => {
+    const playerList = document.getElementById("playerList");
+    playerList.innerHTML = "";
+    data.players.forEach(player => {
+        const li = document.createElement("li");
+        li.textContent = player;
+        playerList.appendChild(li);
     });
-    isHost = (mySid === data.host_sid);
-    startBtn.style.display = isHost ? '' : 'none';
 });
 
-startBtn.onclick = () => {
-    socket.emit('start_game');
-};
+function startGame() {
+    socket.emit("player_ready", { name: myName });
+    document.getElementById("startButton").disabled = true;
+    document.getElementById("startButton").textContent = "Waiting...";
+}
 
-socket.on('game_started', () => {
-    startBtn.disabled = true;
-    startBtn.textContent = "Game Starting...";
+socket.on("start_game", () => {
+    alert("Game is starting!");
+    // Future: redirect to game screen
 });
