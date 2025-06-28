@@ -1,44 +1,28 @@
 const socket = io();
-let myName = "";
+
 let hasJoined = false;
-hasJoined = true;
 
-function joinGame() {
-    const nameInput = document.getElementById("nameInput");
-    myName = nameInput.value.trim();
-    if (myName === "") return alert("Please enter a name");
+const lobbyDiv = document.getElementById("lobby");
+const nameInput = document.getElementById("nameInput");
+const joinButton = document.getElementById("joinButton");
 
-    socket.emit("join", { name: myName });
-
-    document.getElementById("joinScreen").style.display = "none";
-    document.getElementById("lobby").style.display = "block";
-}
-
-socket.on("player_list", data => {
-    const playerList = document.getElementById("playerList");
-    playerList.innerHTML = "";
-    data.players.forEach(player => {
-        const li = document.createElement("li");
-        li.textContent = player;
-        playerList.appendChild(li);
-    });
+joinButton.addEventListener("click", () => {
+  const playerName = nameInput.value.trim();
+  if (!playerName) {
+    alert("Please enter your name");
+    return;
+  }
+  socket.emit("join", { name: playerName });
+  hasJoined = true;
+  joinButton.disabled = true;
+  nameInput.disabled = true;
 });
 
-function startGame() {
-    socket.emit("player_ready", { name: myName });
-    document.getElementById("startButton").disabled = true;
-    document.getElementById("startButton").textContent = "Waiting...";
-}
+// Handle the game start data (role, word)
+socket.on("game_data", (data) => {
+  if (!hasJoined) return; // Ignore if not joined
 
-socket.on("game_data", data => {
-  if (!hasJoined) return;
-    document.getElementById("startButton").disabled = true;
-    document.getElementById("startButton").textContent = "Game Starting...";
-    alert("Game is starting!");
-    // Future: redirect to game screen
-});
-socket.on("game_data", data => {
-  document.getElementById("lobby").style.display = "none";
+  lobbyDiv.style.display = "none";
 
   const gameScreen = document.createElement("div");
   gameScreen.id = "gameScreen";
@@ -60,49 +44,17 @@ socket.on("game_data", data => {
   timer.id = "timer";
   timer.innerText = "Waiting for everyone to get ready...";
   gameScreen.appendChild(timer);
+
   document.body.appendChild(gameScreen);
 
-  // Notify server that this client is ready
+  // Tell server this client is ready
   socket.emit("client_ready");
 });
 
-
-socket.on("join_error", data => {
-  alert(data.message);
-});
-socket.on("player_list", data => {
-  if (!hasJoined) return;
-  const voteContainer = document.createElement("div");
-  voteContainer.id = "voteContainer";
-  voteContainer.innerHTML = "<h3>Who do you think is the Chameleon?</h3>";
-
-  data.players.forEach(player => {
-    const btn = document.createElement("button");
-    btn.innerText = player;
-    btn.onclick = () => {
-      socket.emit("submit_vote", { vote: player });
-      voteContainer.innerHTML = `<p>You voted for <b>${player}</b>. Waiting for others...</p>`;
-    };
-    voteContainer.appendChild(btn);
-    voteContainer.appendChild(document.createElement("br"));
-  });
-
-  document.body.appendChild(voteContainer);
-});
-socket.on("voting_result", data => {
-  const resultDiv = document.createElement("div");
-  resultDiv.innerHTML = "<h3>Voting Results:</h3>";
-
-  for (const [voter, voted] of Object.entries(data.votes)) {
-    const line = document.createElement("p");
-    line.innerText = `${voter} voted for ${voted}`;
-    resultDiv.appendChild(line);
-  }
-
-  document.body.appendChild(resultDiv);
-});
+// Start the countdown timer when server says to start
 socket.on("start_timer", () => {
   if (!hasJoined) return;
+
   const timer = document.getElementById("timer");
   timer.innerText = "Game starts in 10 seconds...";
 
@@ -117,8 +69,58 @@ socket.on("start_timer", () => {
       } else {
         clearInterval(countdown);
         timer.innerText = "Time is up!";
-        socket.emit("request_player_list"); // Start voting
+        socket.emit("request_player_list"); // Request voting list
       }
     }, 1000);
-  }, 10000); // Delay before actual timer
+  }, 10000);
+});
+
+// Show voting buttons
+socket.on("player_list", (data) => {
+  if (!hasJoined) return;
+
+  // Remove old voting UI if any
+  const oldVoteContainer = document.getElementById("voteContainer");
+  if (oldVoteContainer) oldVoteContainer.remove();
+
+  const voteContainer = document.createElement("div");
+  voteContainer.id = "voteContainer";
+  voteContainer.style.textAlign = "center";
+  voteContainer.style.marginTop = "20px";
+  voteContainer.innerHTML = "<h3>Who do you think is the Chameleon?</h3>";
+
+  data.players.forEach((player) => {
+    const btn = document.createElement("button");
+    btn.innerText = player;
+    btn.style.margin = "5px";
+    btn.onclick = () => {
+      socket.emit("submit_vote", { vote: player });
+      voteContainer.innerHTML = `<p>You voted for <b>${player}</b>. Waiting for others...</p>`;
+    };
+    voteContainer.appendChild(btn);
+  });
+
+  document.body.appendChild(voteContainer);
+});
+
+// Show voting results
+socket.on("voting_result", (data) => {
+  if (!hasJoined) return;
+
+  // Remove old vote UI
+  const voteContainer = document.getElementById("voteContainer");
+  if (voteContainer) voteContainer.remove();
+
+  const resultDiv = document.createElement("div");
+  resultDiv.style.textAlign = "center";
+  resultDiv.style.marginTop = "20px";
+  resultDiv.innerHTML = "<h3>Voting Results:</h3>";
+
+  for (const [voter, voted] of Object.entries(data.votes)) {
+    const line = document.createElement("p");
+    line.innerText = `${voter} voted for ${voted}`;
+    resultDiv.appendChild(line);
+  }
+
+  document.body.appendChild(resultDiv);
 });
