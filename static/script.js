@@ -3,26 +3,25 @@ let hasJoined = false;
 
 window.onload = () => {
   const lobbyDiv = document.getElementById("lobby");
-const nameInput = document.getElementById("nameInput");
-const joinButton = document.getElementById("joinButton");
+window.onload = () => {
+  const socket = io();
 
-joinButton.addEventListener("click", () => {
-  const playerName = nameInput.value.trim();
-  if (!playerName) {
-    alert("Please enter your name");
-    return;
-  }
+  const nameInput = document.getElementById("nameInput");
+  const joinButton = document.getElementById("joinButton");
 
-  // Clear old vote UI if exists
-  const oldVote = document.getElementById("voteContainer");
-  if (oldVote) oldVote.remove();
+  joinButton.addEventListener("click", () => {
+    const name = nameInput.value.trim();
+    if (!name) {
+      alert("Please enter your name");
+      return;
+    }
 
-  socket.emit("join", { name: playerName });  // 🔥 Sends to server!
-  hasJoined = true;
+    socket.emit("join", { name });
+    joinButton.disabled = true;
+    nameInput.disabled = true;
+  });
+};
 
-  joinButton.disabled = true;
-  nameInput.disabled = true;
-});
 
 
   socket.on("game_data", (data) => {
