@@ -47,3 +47,6 @@ socket.on("game_data", data => {
 
     document.body.appendChild(gameScreen);
 });
+socket.on("join_error", data => {
+  alert(data.message);
+});

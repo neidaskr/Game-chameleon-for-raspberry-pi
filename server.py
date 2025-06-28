@@ -23,10 +23,15 @@ sid_map = {}
 def on_join(data):
     username = data['name']
     sid = request.sid
-    if username not in players:
-        players.append(username)
-        sid_map[username] = sid  # Save their socket ID
-        emit('player_list', {'players': players}, broadcast=True)
+
+    if username in players:
+        emit('join_error', {'message': 'Name already taken'})
+        return
+
+    players.append(username)
+    sid_map[username] = sid
+    emit('player_list', {'players': players}, broadcast=True)
+
 
 
 
@@ -38,21 +43,25 @@ def on_disconnect():
     pass  # For a robust solution, track players by sid and name
     emit('player_list', {'players': players}, broadcast=True)
 
+
 @socketio.on('player_ready')
 def on_ready(data):
     ready_players.add(data['name'])
+
     if len(ready_players) == len(players):
-        # Game start
+        # Only start game when everyone is ready
         word_list = ["Pineapple", "Rocket", "Pencil", "Submarine", "Volcano"]
         secret_word = random.choice(word_list)
         chameleon = random.choice(players)
 
-        for player in players:
-            if player == chameleon:
-                socketio.emit('game_data', {'role': 'player', 'word': secret_word}, to=sid_map[player])
-            else:
-                socketio.emit('game_data', {'role': 'chameleon'}, to=sid_map[player])
+        print(f"[Game Start] Word: {secret_word}, Chameleon: {chameleon}")
 
+        for player in players:
+            sid = sid_map[player]
+            if player == chameleon:
+                socketio.emit('game_data', {'role': 'chameleon'}, to=sid)
+            else:
+                socketio.emit('game_data', {'role': 'player', 'word': secret_word}, to=sid)
 
 
 if __name__ == '__main__':
