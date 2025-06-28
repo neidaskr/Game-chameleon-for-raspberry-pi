@@ -55,32 +55,12 @@ socket.on("game_data", data => {
 
   const timer = document.createElement("h3");
   timer.id = "timer";
-  timer.innerText = "Game starts in 10 seconds...";
+  timer.innerText = "Waiting for everyone to get ready...";
   gameScreen.appendChild(timer);
-
   document.body.appendChild(gameScreen);
 
-  // Wait 10 seconds, then start 1-minute countdown
-  setTimeout(() => {
-    let timeLeft = 60;
-    timer.innerText = `Time left: ${timeLeft}s`;
-
-    const countdown = setInterval(() => {
-      timeLeft--;
-      if (timeLeft > 0) {
-        timer.innerText = `Time left: ${timeLeft}s`;
-      } else {
-        // Replace timer.innerText = "Time is up!"; with:
-
-clearInterval(countdown);
-timer.innerText = "Time is up!";
-
-// Show voting screen
-socket.emit("request_player_list"); // Ask server for names
-
-      }
-    }, 1000);
-  }, 10000); // 10 sec delay
+  // Notify server that this client is ready
+  socket.emit("client_ready");
 });
 
 
@@ -116,4 +96,24 @@ socket.on("voting_result", data => {
   }
 
   document.body.appendChild(resultDiv);
+});
+socket.on("start_timer", () => {
+  const timer = document.getElementById("timer");
+  timer.innerText = "Game starts in 10 seconds...";
+
+  setTimeout(() => {
+    let timeLeft = 60;
+    timer.innerText = `Time left: ${timeLeft}s`;
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+      if (timeLeft > 0) {
+        timer.innerText = `Time left: ${timeLeft}s`;
+      } else {
+        clearInterval(countdown);
+        timer.innerText = "Time is up!";
+        socket.emit("request_player_list"); // Start voting
+      }
+    }, 1000);
+  }, 10000); // Delay before actual timer
 });

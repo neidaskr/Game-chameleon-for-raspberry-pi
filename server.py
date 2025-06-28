@@ -1,6 +1,7 @@
 import random
 sid_map = {}
 votes = {}
+ready_clients = set()
 
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
@@ -88,3 +89,12 @@ def receive_vote(data):
     if len(votes) == len(players):
         # All players voted, announce result
         socketio.emit("voting_result", {"votes": votes})
+
+@socketio.on("client_ready")
+def handle_client_ready():
+    sid = request.sid
+    ready_clients.add(sid)
+
+    if len(ready_clients) == len(players):
+        socketio.emit("start_timer")
+
