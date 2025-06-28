@@ -1,4 +1,5 @@
 import random
+sid_map = {}
 
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
@@ -24,8 +25,9 @@ def on_join(data):
     sid = request.sid
     if username not in players:
         players.append(username)
-        sid_map[username] = sid
+        sid_map[username] = sid  # Save their socket ID
         emit('player_list', {'players': players}, broadcast=True)
+
 
 
 @socketio.on('disconnect')
@@ -47,9 +49,10 @@ def on_ready(data):
 
         for player in players:
             if player == chameleon:
-                socketio.emit('game_data', {'role': 'chameleon'}, to=data['sid_map'][player])
+                socketio.emit('game_data', {'role': 'player', 'word': secret_word}, to=sid_map[player])
             else:
-                socketio.emit('game_data', {'role': 'player', 'word': secret_word}, to=data['sid_map'][player])
+                socketio.emit('game_data', {'role': 'chameleon'}, to=sid_map[player])
+
 
 
 if __name__ == '__main__':
