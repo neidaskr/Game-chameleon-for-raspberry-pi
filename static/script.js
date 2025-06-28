@@ -35,18 +35,50 @@ socket.on("start_game", () => {
     // Future: redirect to game screen
 });
 socket.on("game_data", data => {
-    document.getElementById("lobby").style.display = "none";
-    const gameScreen = document.createElement("div");
-    gameScreen.id = "gameScreen";
+  document.getElementById("lobby").style.display = "none";
 
-    if (data.role === "chameleon") {
-        gameScreen.innerHTML = "<h2>You are the <span style='color:red'>Chameleon</span>! Act like you know the word!</h2>";
-    } else {
-        gameScreen.innerHTML = `<h2>The word is: <span style='color:green'>${data.word}</span></h2>`;
-    }
+  const gameScreen = document.createElement("div");
+  gameScreen.id = "gameScreen";
+  gameScreen.style.textAlign = "center";
+  gameScreen.style.marginTop = "50px";
 
-    document.body.appendChild(gameScreen);
+  if (data.role === "chameleon") {
+    gameScreen.innerHTML = `
+      <h2>You are the <span style="color:red">Chameleon</span>!</h2>
+      <p>Pretend you know the word!</p>
+    `;
+  } else {
+    gameScreen.innerHTML = `
+      <h2>The word is: <span style="color:green">${data.word}</span></h2>
+    `;
+  }
+
+  const timer = document.createElement("h3");
+  timer.id = "timer";
+  timer.innerText = "Game starts in 10 seconds...";
+  gameScreen.appendChild(timer);
+
+  document.body.appendChild(gameScreen);
+
+  // Wait 10 seconds, then start 1-minute countdown
+  setTimeout(() => {
+    let timeLeft = 60;
+    timer.innerText = `Time left: ${timeLeft}s`;
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+      if (timeLeft > 0) {
+        timer.innerText = `Time left: ${timeLeft}s`;
+      } else {
+        clearInterval(countdown);
+        timer.innerText = "Time is up!";
+        // Optionally: emit "round_over" to server or trigger voting
+      }
+    }, 1000);
+  }, 10000); // 10 sec delay
 });
+
+
 socket.on("join_error", data => {
   alert(data.message);
 });
