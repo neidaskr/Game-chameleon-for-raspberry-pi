@@ -70,9 +70,14 @@ socket.on("game_data", data => {
       if (timeLeft > 0) {
         timer.innerText = `Time left: ${timeLeft}s`;
       } else {
-        clearInterval(countdown);
-        timer.innerText = "Time is up!";
-        // Optionally: emit "round_over" to server or trigger voting
+        // Replace timer.innerText = "Time is up!"; with:
+
+clearInterval(countdown);
+timer.innerText = "Time is up!";
+
+// Show voting screen
+socket.emit("request_player_list"); // Ask server for names
+
       }
     }, 1000);
   }, 10000); // 10 sec delay
@@ -81,4 +86,34 @@ socket.on("game_data", data => {
 
 socket.on("join_error", data => {
   alert(data.message);
+});
+socket.on("player_list", data => {
+  const voteContainer = document.createElement("div");
+  voteContainer.id = "voteContainer";
+  voteContainer.innerHTML = "<h3>Who do you think is the Chameleon?</h3>";
+
+  data.players.forEach(player => {
+    const btn = document.createElement("button");
+    btn.innerText = player;
+    btn.onclick = () => {
+      socket.emit("submit_vote", { vote: player });
+      voteContainer.innerHTML = `<p>You voted for <b>${player}</b>. Waiting for others...</p>`;
+    };
+    voteContainer.appendChild(btn);
+    voteContainer.appendChild(document.createElement("br"));
+  });
+
+  document.body.appendChild(voteContainer);
+});
+socket.on("voting_result", data => {
+  const resultDiv = document.createElement("div");
+  resultDiv.innerHTML = "<h3>Voting Results:</h3>";
+
+  for (const [voter, voted] of Object.entries(data.votes)) {
+    const line = document.createElement("p");
+    line.innerText = `${voter} voted for ${voted}`;
+    resultDiv.appendChild(line);
+  }
+
+  document.body.appendChild(resultDiv);
 });

@@ -1,5 +1,6 @@
 import random
 sid_map = {}
+votes = {}
 
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
@@ -66,3 +67,24 @@ def on_ready(data):
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    
+@socketio.on("request_player_list")
+def send_players():
+    emit("player_list", {"players": players})
+
+@socketio.on("submit_vote")
+def receive_vote(data):
+    voter_sid = request.sid
+    voter_name = None
+    for name, sid in sid_map.items():
+        if sid == voter_sid:
+            voter_name = name
+            break
+
+    voted = data["vote"]
+    votes[voter_name] = voted
+    print(f"{voter_name} voted for {voted}")
+
+    if len(votes) == len(players):
+        # All players voted, announce result
+        socketio.emit("voting_result", {"votes": votes})
