@@ -2,6 +2,7 @@ import random
 sid_map = {}
 votes = {}
 ready_clients = set()
+player_data = {}
 
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
@@ -22,16 +23,17 @@ def index():
 sid_map = {}
 
 @socketio.on('join')
-def on_join(data):
-    username = data['name']
+def handle_join(data):
     sid = request.sid
-
-    if username in players:
+    name = data['name']
+    player_data[sid] = name
+    print(f"{name} joined the game.")
+    if name in players:
         emit('join_error', {'message': 'Name already taken'})
         return
 
-    players.append(username)
-    sid_map[username] = sid
+    players.append(name)
+    sid_map[name] = sid
     emit('player_list', {'players': players}, broadcast=True)
 
 
