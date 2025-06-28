@@ -1,6 +1,9 @@
-# server.py
+import random
+
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
+
+
 
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
@@ -13,14 +16,17 @@ ready_players = set()
 def index():
     return render_template('index.html')
 
+sid_map = {}
+
 @socketio.on('join')
 def on_join(data):
     username = data['name']
+    sid = request.sid
     if username not in players:
         players.append(username)
-    # Reset ready_players every time someone joins
-    ready_players.clear()
-    emit('player_list', {'players': players}, broadcast=True)
+        sid_map[username] = sid
+        emit('player_list', {'players': players}, broadcast=True)
+
 
 @socketio.on('disconnect')
 def on_disconnect():
@@ -33,8 +39,18 @@ def on_disconnect():
 @socketio.on('player_ready')
 def on_ready(data):
     ready_players.add(data['name'])
-    if len(ready_players) == len(players) and len(players) > 0:
-        emit('start_game', broadcast=True)
+    if len(ready_players) == len(players):
+        # Game start
+        word_list = ["Pineapple", "Rocket", "Pencil", "Submarine", "Volcano"]
+        secret_word = random.choice(word_list)
+        chameleon = random.choice(players)
+
+        for player in players:
+            if player == chameleon:
+                socketio.emit('game_data', {'role': 'chameleon'}, to=data['sid_map'][player])
+            else:
+                socketio.emit('game_data', {'role': 'player', 'word': secret_word}, to=data['sid_map'][player])
+
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

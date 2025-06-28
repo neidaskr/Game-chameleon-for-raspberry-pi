@@ -34,3 +34,16 @@ socket.on("start_game", () => {
     alert("Game is starting!");
     // Future: redirect to game screen
 });
+socket.on("game_data", data => {
+    document.getElementById("lobby").style.display = "none";
+    const gameScreen = document.createElement("div");
+    gameScreen.id = "gameScreen";
+
+    if (data.role === "chameleon") {
+        gameScreen.innerHTML = "<h2>You are the <span style='color:red'>Chameleon</span>! Act like you know the word!</h2>";
+    } else {
+        gameScreen.innerHTML = `<h2>The word is: <span style='color:green'>${data.word}</span></h2>`;
+    }
+
+    document.body.appendChild(gameScreen);
+});

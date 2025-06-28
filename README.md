@@ -1,5 +1,4 @@
 # Chameleon Game Lobby (Start Screen)
-NOT WORKING 🚫 
 
 A modern, real-time lobby for a local-network party game (like "Chameleon"), built with Flask + Flask-SocketIO. Players join via browser, see a live-updating lobby, and the first player is the host.
 
