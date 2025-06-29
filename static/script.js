@@ -1,5 +1,6 @@
 const socket = io();
 let hasJoined = false;
+let eliminated = false; // Track if this player is eliminated
 
 window.onload = () => {
   const lobbyDiv = document.getElementById("lobby");
@@ -113,7 +114,7 @@ window.onload = () => {
 
   // ✅ Only this triggers the voting phase
   socket.on("voting_phase", (data) => {
-    if (!hasJoined) return;
+    if (!hasJoined || eliminated) return; // Prevent eliminated players from voting
 
     // Remove any previous voting/result screens
     const oldVote = document.getElementById("voteContainer");
@@ -227,6 +228,7 @@ window.onload = () => {
   });
 
   socket.on("eliminated", () => {
+    eliminated = true; // Set eliminated flag
     // Remove all game UI
     document.body.innerHTML = "";
     // Show eliminated message
@@ -277,6 +279,7 @@ window.onload = () => {
   });
 
   socket.on("next_voting_round", (data) => {
+    if (eliminated) return; // Prevent eliminated players from voting
     // Remove any previous voting/result screens
     const oldVote = document.getElementById("voteContainer");
     if (oldVote) oldVote.remove();
