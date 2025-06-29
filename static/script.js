@@ -44,27 +44,45 @@ window.onload = () => {
   socket.on("game_data", (data) => {
     if (!hasJoined) return;
 
-    lobbyDiv.style.display = "none";
+    // Remove lobby card
+    const lobbyCard = document.querySelector('.lobby-card');
+    if (lobbyCard) lobbyCard.remove();
 
-    const gameScreen = document.createElement("div");
-    gameScreen.id = "gameScreen";
+    // Create a fun role card
+    const roleCard = document.createElement("div");
+    roleCard.className = "role-card";
+    roleCard.style.background = "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)";
+    roleCard.style.borderRadius = "2rem";
+    roleCard.style.boxShadow = "0 8px 32px rgba(67, 233, 123, 0.18)";
+    roleCard.style.padding = "2.5rem 2rem 2rem 2rem";
+    roleCard.style.maxWidth = "370px";
+    roleCard.style.width = "100%";
+    roleCard.style.textAlign = "center";
+    roleCard.style.margin = "40px auto";
+    roleCard.style.animation = "popin 0.7s cubic-bezier(.68,-0.55,.27,1.55)";
 
     if (data.role === "chameleon") {
-      gameScreen.innerHTML = `
-        <h2>You are the <span style="color:red">Chameleon</span>!</h2>
-        <p>Pretend you know the word!</p>
+      roleCard.innerHTML = `
+        <div style="font-size:2.5rem;">🦎</div>
+        <h2 style="color:#ff4e50; font-family:'Fredoka One',cursive;">You are the <span style='color:#ffb347;'>Chameleon!</span></h2>
+        <p style="font-size:1.2rem;">Try to blend in and guess the word!</p>
       `;
     } else {
-      gameScreen.innerHTML = `
-        <h2>The word is: <span style="color:green">${data.word}</span></h2>
+      roleCard.innerHTML = `
+        <div style="font-size:2.5rem;">🦎</div>
+        <h2 style="color:#43e97b; font-family:'Fredoka One',cursive;">You are <span style='color:#ff4e50;'>NOT</span> the Chameleon!</h2>
+        <p style="font-size:1.2rem;">The secret word is:</p>
+        <div style="font-size:2rem; font-weight:700; color:#f9d423; margin:1rem 0;">${data.word}</div>
+        <p style="font-size:1.1rem; color:#888;">Keep it secret from the Chameleon!</p>
       `;
     }
 
+    // Add timer placeholder
     const timer = document.createElement("h3");
     timer.id = "timer";
     timer.innerText = "Waiting for others...";
-    gameScreen.appendChild(timer);
-    document.body.appendChild(gameScreen);
+    roleCard.appendChild(timer);
+    document.body.appendChild(roleCard);
 
     socket.emit("client_ready");
   });
