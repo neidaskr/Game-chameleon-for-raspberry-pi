@@ -186,4 +186,43 @@ window.onload = () => {
 
     document.body.appendChild(resultDiv);
   });
+
+  socket.on("tie_vote", () => {
+    // Remove previous voting/result screens
+    const oldVote = document.getElementById("voteContainer");
+    if (oldVote) oldVote.remove();
+    const oldResult = document.querySelector(".role-card");
+    if (oldResult) oldResult.remove();
+
+    // Show tie message and restart timer
+    const tieDiv = document.createElement("div");
+    tieDiv.id = "tieDiv";
+    tieDiv.style.background = "#fff";
+    tieDiv.style.borderRadius = "0.5rem";
+    tieDiv.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)";
+    tieDiv.style.padding = "1.2rem 1rem";
+    tieDiv.style.maxWidth = "300px";
+    tieDiv.style.width = "100%";
+    tieDiv.style.textAlign = "center";
+    tieDiv.style.margin = "40px auto";
+    tieDiv.style.border = "1px solid #e0e0e0";
+    tieDiv.innerHTML = `<h3 style='color:#1a237e; font-size:1.1rem; margin-bottom:1rem;'>Balsavimas lygus! Pradedamas naujas raundas po 10 sekundžių...</h3><div id='timer'>10</div>`;
+    document.body.appendChild(tieDiv);
+
+    let timeLeft = 10;
+    const timer = document.getElementById("timer");
+    const tieCountdown = setInterval(() => {
+      timeLeft--;
+      timer.innerText = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(tieCountdown);
+        tieDiv.innerHTML = "<h3 style='color:#1a237e;'>Naujas balsavimo raundas!</h3>";
+        setTimeout(() => {
+          tieDiv.remove();
+          // Re-request voting phase
+          socket.emit("request_player_list");
+        }, 1000);
+      }
+    }, 1000);
+  });
 };

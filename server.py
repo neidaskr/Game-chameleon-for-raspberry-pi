@@ -1,6 +1,7 @@
 import random
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
+from collections import Counter
 
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
@@ -82,11 +83,22 @@ def submit_vote(data):
     print(f"{balsaves} balsavo už {balsas_uz}")
 
     if len(balsai) == len(zaidejai):
-        socketio.emit("voting_result", {
-            "votes": balsai,
-            "chameleon": chameleonas
-        })
-        reset_game()
+        # Count votes
+        balsu_sk = Counter(balsai.values())
+        max_balsu = max(balsu_sk.values())
+        daugiausiai = [vardas for vardas, kiek in balsu_sk.items() if kiek == max_balsu]
+        if len(daugiausiai) > 1:
+            # Tie detected
+            print("Balsavimas lygus! Pradedamas naujas balsavimo raundas.")
+            balsai.clear()
+            pasiruose.clear()
+            socketio.emit("tie_vote")  # Notify clients to restart timer
+        else:
+            socketio.emit("voting_result", {
+                "votes": balsai,
+                "chameleon": chameleonas
+            })
+            reset_game()
 
 def reset_game():
     global balsai, chameleonas, slaptas_zodis, pasiruose
