@@ -5,8 +5,8 @@ window.onload = () => {
   const lobbyDiv = document.getElementById("lobby");
   const nameInput = document.getElementById("nameInput");
   const joinButton = document.getElementById("joinButton");
-  const startButton = document.getElementById("startButton");
   const startContainer = document.getElementById("startContainer");
+  const startButton = document.getElementById("startButton");
 
   joinButton.addEventListener("click", () => {
     const name = nameInput.value.trim();
@@ -62,7 +62,7 @@ window.onload = () => {
 
     const timer = document.createElement("h3");
     timer.id = "timer";
-    timer.innerText = "Waiting for other players...";
+    timer.innerText = "Waiting for others...";
     gameScreen.appendChild(timer);
     document.body.appendChild(gameScreen);
 
@@ -92,15 +92,13 @@ window.onload = () => {
     }, 10000);
   });
 
-  socket.on("player_list", (data) => {
+  // ✅ Only this triggers the voting phase
+  socket.on("voting_phase", (data) => {
     if (!hasJoined) return;
 
-    const voteContainer = document.getElementById("voteContainer");
-    if (voteContainer) voteContainer.remove();
-
-    const container = document.createElement("div");
-    container.id = "voteContainer";
-    container.innerHTML = "<h3>Who do you think is the Chameleon?</h3>";
+    const voteContainer = document.createElement("div");
+    voteContainer.id = "voteContainer";
+    voteContainer.innerHTML = "<h3>Who do you think is the Chameleon?</h3>";
 
     data.players.forEach((player) => {
       const btn = document.createElement("button");
@@ -108,12 +106,12 @@ window.onload = () => {
       btn.style.margin = "5px";
       btn.onclick = () => {
         socket.emit("submit_vote", { vote: player });
-        container.innerHTML = `<p>You voted for <b>${player}</b>. Waiting for others...</p>`;
+        voteContainer.innerHTML = `<p>You voted for <b>${player}</b>. Waiting for others...</p>`;
       };
-      container.appendChild(btn);
+      voteContainer.appendChild(btn);
     });
 
-    document.body.appendChild(container);
+    document.body.appendChild(voteContainer);
   });
 
   socket.on("voting_result", (data) => {

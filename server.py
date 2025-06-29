@@ -6,10 +6,10 @@ app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
 
 players = []
-ready_clients = set()
 sid_map = {}
 player_data = {}
 votes = {}
+ready_clients = set()
 chameleon = None
 secret_word = None
 
@@ -29,7 +29,7 @@ def handle_join(data):
     player_data[sid] = name
     sid_map[name] = sid
     players.append(name)
-    print(f"{name} joined.")
+    print(f"{name} joined the game.")
     emit('player_list', {'players': players}, broadcast=True)
 
 @socketio.on('disconnect')
@@ -40,13 +40,14 @@ def on_disconnect():
         players.remove(name)
         sid_map.pop(name, None)
         player_data.pop(sid, None)
+        ready_clients.discard(sid)
     emit('player_list', {'players': players}, broadcast=True)
 
 @socketio.on("start_game")
-def handle_start_game():
+def start_game():
     global chameleon, secret_word
     if len(players) < 2:
-        emit("join_error", {"message": "Need at least 2 players to start"})
+        emit("join_error", {"message": "Need at least 2 players"})
         return
 
     word_list = ["Pineapple", "Rocket", "Pencil", "Submarine", "Volcano"]
@@ -57,27 +58,29 @@ def handle_start_game():
     for player in players:
         sid = sid_map[player]
         if player == chameleon:
-            socketio.emit('game_data', {'role': 'chameleon'}, to=sid)
+            socketio.emit("game_data", {"role": "chameleon"}, to=sid)
         else:
-            socketio.emit('game_data', {'role': 'player', 'word': secret_word}, to=sid)
+            socketio.emit("game_data", {"role": "player", "word": secret_word}, to=sid)
 
-@socketio.on('client_ready')
-def handle_client_ready():
-    ready_clients.add(request.sid)
+@socketio.on("client_ready")
+def client_ready():
+    sid = request.sid
+    ready_clients.add(sid)
     if len(ready_clients) == len(players):
         socketio.emit("start_timer")
 
 @socketio.on("request_player_list")
 def send_players():
-    emit("player_list", {"players": players})
+    # ✅ only triggers voting phase
+    socketio.emit("voting_phase", {"players": players})
 
 @socketio.on("submit_vote")
-def receive_vote(data):
+def submit_vote(data):
     voter_sid = request.sid
     voter_name = player_data.get(voter_sid)
-    voted = data["vote"]
-    votes[voter_name] = voted
-    print(f"{voter_name} voted for {voted}")
+    vote_for = data["vote"]
+    votes[voter_name] = vote_for
+    print(f"{voter_name} voted for {vote_for}")
 
     if len(votes) == len(players):
         socketio.emit("voting_result", {
@@ -87,11 +90,11 @@ def receive_vote(data):
         reset_game()
 
 def reset_game():
-    global ready_clients, votes, chameleon, secret_word
-    ready_clients.clear()
+    global votes, chameleon, secret_word, ready_clients
     votes.clear()
     chameleon = None
     secret_word = None
+    ready_clients.clear()
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
