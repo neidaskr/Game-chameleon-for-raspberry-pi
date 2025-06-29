@@ -225,4 +225,54 @@ window.onload = () => {
       }
     }, 1000);
   });
+
+  socket.on("eliminated", () => {
+    // Remove all game UI
+    document.body.innerHTML = "";
+    // Show eliminated message
+    const elimDiv = document.createElement("div");
+    elimDiv.style.background = "#fff";
+    elimDiv.style.borderRadius = "0.5rem";
+    elimDiv.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)";
+    elimDiv.style.padding = "1.2rem 1rem";
+    elimDiv.style.maxWidth = "300px";
+    elimDiv.style.width = "100%";
+    elimDiv.style.textAlign = "center";
+    elimDiv.style.margin = "40px auto";
+    elimDiv.style.border = "1px solid #e0e0e0";
+    elimDiv.innerHTML = `<h2 style='color:#1a237e; font-size:1.2rem;'>Tu esi išbalsuotas.</h2><p style='color:#3949ab;'>Stebėk žaidimą kaip žiūrovas.</p>`;
+    document.body.appendChild(elimDiv);
+  });
+
+  socket.on("chameleon_win", () => {
+    document.body.innerHTML = "";
+    const winDiv = document.createElement("div");
+    winDiv.style.background = "#fff";
+    winDiv.style.borderRadius = "0.5rem";
+    winDiv.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)";
+    winDiv.style.padding = "1.2rem 1rem";
+    winDiv.style.maxWidth = "300px";
+    winDiv.style.width = "100%";
+    winDiv.style.textAlign = "center";
+    winDiv.style.margin = "40px auto";
+    winDiv.style.border = "1px solid #e0e0e0";
+    winDiv.innerHTML = `<h2 style='color:#1a237e; font-size:1.2rem;'>Tu laimėjai!</h2><p style='color:#3949ab;'>Chameleonas išliko nepastebėtas.</p>`;
+    document.body.appendChild(winDiv);
+  });
+
+  socket.on("chameleon_win_others", (data) => {
+    document.body.innerHTML = "";
+    const loseDiv = document.createElement("div");
+    loseDiv.style.background = "#fff";
+    loseDiv.style.borderRadius = "0.5rem";
+    loseDiv.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)";
+    loseDiv.style.padding = "1.2rem 1rem";
+    loseDiv.style.maxWidth = "300px";
+    loseDiv.style.width = "100%";
+    loseDiv.style.textAlign = "center";
+    loseDiv.style.margin = "40px auto";
+    loseDiv.style.border = "1px solid #e0e0e0";
+    loseDiv.innerHTML = `<h2 style='color:#1a237e; font-size:1.2rem;'>Chameleonas laimėjo!</h2><p style='color:#3949ab;'>Chameleonas buvo: <b>${data.chameleon}</b></p>`;
+    document.body.appendChild(loseDiv);
+  });
 };

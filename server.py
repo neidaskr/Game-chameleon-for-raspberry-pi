@@ -13,6 +13,7 @@ balsai = {}
 pasiruose = set()
 chameleonas = None
 slaptas_zodis = None
+eliminuoti = set()
 
 @app.route('/')
 def index():
@@ -31,7 +32,7 @@ def handle_join(data):
     sid_zemelapis[vardas] = sid
     zaidejai.append(vardas)
     print(f"{vardas} prisijungė prie žaidimo.")
-    emit('player_list', {'players': zaidejai}, broadcast=True)
+    emit('player_list', {'players': zaidejai, 'eliminated': list(eliminuoti)}, broadcast=True)
 
 @socketio.on('disconnect')
 def on_disconnect():
@@ -42,11 +43,12 @@ def on_disconnect():
         sid_zemelapis.pop(vardas, None)
         zaidejo_duomenys.pop(sid, None)
         pasiruose.discard(sid)
-    emit('player_list', {'players': zaidejai}, broadcast=True)
+    emit('player_list', {'players': zaidejai, 'eliminated': list(eliminuoti)}, broadcast=True)
 
 @socketio.on("start_game")
 def start_game():
-    global chameleonas, slaptas_zodis
+    global chameleonas, slaptas_zodis, eliminuoti
+    eliminuoti.clear()
     if len(zaidejai) < 2:
         emit("join_error", {"message": "Reikia bent 2 žaidėjų"})
         return
@@ -72,31 +74,54 @@ def client_ready():
 
 @socketio.on("request_player_list")
 def send_players():
-    socketio.emit("voting_phase", {"players": zaidejai})
+    # Only allow non-eliminated players to vote and be voted for
+    aktyvus = [v for v in zaidejai if v not in eliminuoti]
+    socketio.emit("voting_phase", {"players": aktyvus})
 
 @socketio.on("submit_vote")
 def submit_vote(data):
     voter_sid = request.sid
     balsaves = zaidejo_duomenys.get(voter_sid)
+    if balsaves in eliminuoti:
+        return  # Eliminated players can't vote
     balsas_uz = data["vote"]
     balsai[balsaves] = balsas_uz
     print(f"{balsaves} balsavo už {balsas_uz}")
 
-    if len(balsai) == len(zaidejai):
-        # Count votes
+    aktyvus = [v for v in zaidejai if v not in eliminuoti]
+    if len(balsai) == len(aktyvus):
+        from collections import Counter
         balsu_sk = Counter(balsai.values())
         max_balsu = max(balsu_sk.values())
         daugiausiai = [vardas for vardas, kiek in balsu_sk.items() if kiek == max_balsu]
         if len(daugiausiai) > 1:
-            # Tie detected
             print("Balsavimas lygus! Pradedamas naujas balsavimo raundas.")
             balsai.clear()
             pasiruose.clear()
-            socketio.emit("tie_vote")  # Notify clients to restart timer
+            socketio.emit("tie_vote")
         else:
+            eliminuotas = daugiausiai[0]
+            eliminuoti.add(eliminuotas)
+            # Notify eliminated player
+            sid = sid_zemelapis.get(eliminuotas)
+            if sid:
+                socketio.emit("eliminated", {}, to=sid)
+            # Check for endgame: only chameleon and one not chameleon left
+            aktyvus_po = [v for v in zaidejai if v not in eliminuoti]
+            if len(aktyvus_po) == 2 and chameleonas in aktyvus_po:
+                # Chameleon wins
+                for v in aktyvus_po:
+                    sid = sid_zemelapis.get(v)
+                    if v == chameleonas:
+                        socketio.emit("chameleon_win", {}, to=sid)
+                    else:
+                        socketio.emit("chameleon_win_others", {"chameleon": chameleonas}, to=sid)
+                reset_game()
+                return
             socketio.emit("voting_result", {
                 "votes": balsai,
-                "chameleon": chameleonas
+                "chameleon": chameleonas,
+                "eliminated": eliminuotas
             })
             reset_game()
 
