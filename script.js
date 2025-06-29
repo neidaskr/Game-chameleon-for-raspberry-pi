@@ -5,6 +5,8 @@ window.onload = () => {
   const lobbyDiv = document.getElementById("lobby");
   const nameInput = document.getElementById("nameInput");
   const joinButton = document.getElementById("joinButton");
+  const startContainer = document.getElementById("startContainer");
+  const startButton = document.getElementById("startButton");
 
   joinButton.addEventListener("click", () => {
     const name = nameInput.value.trim();
@@ -14,56 +16,75 @@ window.onload = () => {
     }
 
     socket.emit("join", { name });
-    hasJoined = true; // ✅ set correctly
+    hasJoined = true;
     joinButton.disabled = true;
     nameInput.disabled = true;
   });
 
+  startButton.addEventListener("click", () => {
+    socket.emit("start_game");
+    startContainer.style.display = "none";
+  });
+
+  socket.on("join_error", (data) => {
+    alert(data.message);
+    joinButton.disabled = false;
+    nameInput.disabled = false;
+  });
+
+  socket.on("player_list", (data) => {
+    if (!hasJoined) return;
+    if (data.players.length >= 2) {
+      startContainer.style.display = "block";
+    } else {
+      startContainer.style.display = "none";
+    }
+  });
+
   socket.on("game_data", (data) => {
     if (!hasJoined) return;
+    document.body.innerHTML = "";
 
-    lobbyDiv.style.display = "none";
+    const card = document.createElement("div");
+    card.className = "card";
+    card.id = "gameScreen";
 
-    const gameScreen = document.createElement("div");
-    gameScreen.id = "gameScreen";
-    gameScreen.style.textAlign = "center";
-    gameScreen.style.marginTop = "50px";
+    const roleHeader = document.createElement("h2");
+    const message = document.createElement("p");
 
     if (data.role === "chameleon") {
-      gameScreen.innerHTML = `
-        <h2>You are the <span style="color:red">Chameleon</span>!</h2>
-        <p>Pretend you know the word!</p>
-      `;
+      roleHeader.innerHTML = `🦎 You are the <span style="color:red">Chameleon</span>!`;
+      message.innerText = "Pretend you know the secret word.";
     } else {
-      gameScreen.innerHTML = `
-        <h2>The word is: <span style="color:green">${data.word}</span></h2>
-      `;
+      roleHeader.innerHTML = `✅ You are not the Chameleon.`;
+      message.innerHTML = `The secret word is: <strong style="color:lime">${data.word}</strong>`;
     }
 
     const timer = document.createElement("h3");
     timer.id = "timer";
-    timer.innerText = "Waiting for everyone to get ready...";
-    gameScreen.appendChild(timer);
+    timer.innerText = "Waiting for others...";
 
-    document.body.appendChild(gameScreen);
+    card.appendChild(roleHeader);
+    card.appendChild(message);
+    card.appendChild(timer);
+
+    document.body.appendChild(card);
 
     socket.emit("client_ready");
   });
 
   socket.on("start_timer", () => {
-    if (!hasJoined) return;
-
     const timer = document.getElementById("timer");
     timer.innerText = "Game starts in 10 seconds...";
 
     setTimeout(() => {
       let timeLeft = 60;
-      timer.innerText = `Time left: ${timeLeft}s`;
+      timer.innerText = `🕒 Time left: ${timeLeft}s`;
 
       const countdown = setInterval(() => {
         timeLeft--;
         if (timeLeft > 0) {
-          timer.innerText = `Time left: ${timeLeft}s`;
+          timer.innerText = `🕒 Time left: ${timeLeft}s`;
         } else {
           clearInterval(countdown);
           timer.innerText = "Time is up!";
@@ -73,49 +94,57 @@ window.onload = () => {
     }, 10000);
   });
 
-  socket.on("player_list", (data) => {
-    if (!hasJoined) return;
+  socket.on("voting_phase", (data) => {
+    document.body.innerHTML = "";
+    const card = document.createElement("div");
+    card.className = "card";
+    card.id = "voteContainer";
 
-    const oldVote = document.getElementById("voteContainer");
-    if (oldVote) oldVote.remove();
-
-    const voteContainer = document.createElement("div");
-    voteContainer.id = "voteContainer";
-    voteContainer.style.textAlign = "center";
-    voteContainer.style.marginTop = "20px";
-    voteContainer.innerHTML = "<h3>Who do you think is the Chameleon?</h3>";
+    const title = document.createElement("h3");
+    title.innerText = "Who do you think is the Chameleon?";
+    card.appendChild(title);
 
     data.players.forEach((player) => {
       const btn = document.createElement("button");
       btn.innerText = player;
-      btn.style.margin = "5px";
       btn.onclick = () => {
         socket.emit("submit_vote", { vote: player });
-        voteContainer.innerHTML = `<p>You voted for <b>${player}</b>. Waiting for others...</p>`;
+        card.innerHTML = `<p>You voted for <strong>${player}</strong>. Waiting for others...</p>`;
       };
-      voteContainer.appendChild(btn);
+      card.appendChild(btn);
     });
 
-    document.body.appendChild(voteContainer);
+    document.body.appendChild(card);
   });
 
   socket.on("voting_result", (data) => {
-    if (!hasJoined) return;
+    document.body.innerHTML = "";
 
-    const oldVote = document.getElementById("voteContainer");
-    if (oldVote) oldVote.remove();
+    const card = document.createElement("div");
+    card.className = "card";
+    card.id = "results";
 
-    const resultDiv = document.createElement("div");
-    resultDiv.style.textAlign = "center";
-    resultDiv.style.marginTop = "20px";
-    resultDiv.innerHTML = "<h3>Voting Results:</h3>";
+    const title = document.createElement("h3");
+    title.innerText = "🗳️ Voting Results";
+    card.appendChild(title);
 
     for (const [voter, voted] of Object.entries(data.votes)) {
       const line = document.createElement("p");
       line.innerText = `${voter} voted for ${voted}`;
-      resultDiv.appendChild(line);
+      card.appendChild(line);
     }
 
-    document.body.appendChild(resultDiv);
+    const reveal = document.createElement("h3");
+    reveal.style.marginTop = "1.5rem";
+    reveal.innerHTML = `🦎 The Chameleon was: <span style="color:red">${data.chameleon}</span>`;
+    card.appendChild(reveal);
+
+    const restartBtn = document.createElement("button");
+    restartBtn.className = "red";
+    restartBtn.innerText = "🔄 Play Again";
+    restartBtn.onclick = () => window.location.reload();
+    card.appendChild(restartBtn);
+
+    document.body.appendChild(card);
   });
 };
