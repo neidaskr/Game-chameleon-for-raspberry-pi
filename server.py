@@ -5,12 +5,10 @@ from flask_socketio import SocketIO, emit
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
 
-# Global game state
 players = []
-ready_players = set()
 ready_clients = set()
-sid_map = {}  # name -> sid
-player_data = {}  # sid -> name
+sid_map = {}
+player_data = {}
 votes = {}
 chameleon = None
 secret_word = None
@@ -31,45 +29,41 @@ def handle_join(data):
     player_data[sid] = name
     sid_map[name] = sid
     players.append(name)
-    print(f"{name} joined the game.")
+    print(f"{name} joined.")
     emit('player_list', {'players': players}, broadcast=True)
 
 @socketio.on('disconnect')
 def on_disconnect():
     sid = request.sid
     name = player_data.get(sid)
-
     if name:
-        print(f"{name} disconnected.")
         players.remove(name)
-        ready_players.discard(name)
         sid_map.pop(name, None)
         player_data.pop(sid, None)
-
     emit('player_list', {'players': players}, broadcast=True)
 
-@socketio.on('player_ready')
-def on_ready(data):
+@socketio.on("start_game")
+def handle_start_game():
     global chameleon, secret_word
-    ready_players.add(data['name'])
+    if len(players) < 2:
+        emit("join_error", {"message": "Need at least 2 players to start"})
+        return
 
-    if len(ready_players) == len(players):
-        word_list = ["Pineapple", "Rocket", "Pencil", "Submarine", "Volcano"]
-        secret_word = random.choice(word_list)
-        chameleon = random.choice(players)
-        print(f"[Game Start] Word: {secret_word}, Chameleon: {chameleon}")
+    word_list = ["Pineapple", "Rocket", "Pencil", "Submarine", "Volcano"]
+    secret_word = random.choice(word_list)
+    chameleon = random.choice(players)
+    print(f"[Game Start] Word: {secret_word}, Chameleon: {chameleon}")
 
-        for player in players:
-            sid = sid_map[player]
-            if player == chameleon:
-                socketio.emit('game_data', {'role': 'chameleon'}, to=sid)
-            else:
-                socketio.emit('game_data', {'role': 'player', 'word': secret_word}, to=sid)
+    for player in players:
+        sid = sid_map[player]
+        if player == chameleon:
+            socketio.emit('game_data', {'role': 'chameleon'}, to=sid)
+        else:
+            socketio.emit('game_data', {'role': 'player', 'word': secret_word}, to=sid)
 
 @socketio.on('client_ready')
 def handle_client_ready():
     ready_clients.add(request.sid)
-
     if len(ready_clients) == len(players):
         socketio.emit("start_timer")
 
@@ -81,27 +75,19 @@ def send_players():
 def receive_vote(data):
     voter_sid = request.sid
     voter_name = player_data.get(voter_sid)
-
-    if not voter_name:
-        print("Vote from unknown player.")
-        return
-
     voted = data["vote"]
     votes[voter_name] = voted
     print(f"{voter_name} voted for {voted}")
 
     if len(votes) == len(players):
-        print("All votes received.")
         socketio.emit("voting_result", {
             "votes": votes,
-            "chameleon": chameleon  # ✅ reveal Chameleon
+            "chameleon": chameleon
         })
-        reset_game_state()
+        reset_game()
 
-def reset_game_state():
-    print("[Resetting game state]")
-    global ready_players, ready_clients, votes, chameleon, secret_word
-    ready_players.clear()
+def reset_game():
+    global ready_clients, votes, chameleon, secret_word
     ready_clients.clear()
     votes.clear()
     chameleon = None

@@ -5,6 +5,8 @@ window.onload = () => {
   const lobbyDiv = document.getElementById("lobby");
   const nameInput = document.getElementById("nameInput");
   const joinButton = document.getElementById("joinButton");
+  const startButton = document.getElementById("startButton");
+  const startContainer = document.getElementById("startContainer");
 
   joinButton.addEventListener("click", () => {
     const name = nameInput.value.trim();
@@ -14,9 +16,29 @@ window.onload = () => {
     }
 
     socket.emit("join", { name });
-    hasJoined = true; // ✅ set correctly
+    hasJoined = true;
     joinButton.disabled = true;
     nameInput.disabled = true;
+  });
+
+  startButton.addEventListener("click", () => {
+    socket.emit("start_game");
+    startContainer.style.display = "none";
+  });
+
+  socket.on("join_error", (data) => {
+    alert(data.message);
+    joinButton.disabled = false;
+    nameInput.disabled = false;
+  });
+
+  socket.on("player_list", (data) => {
+    if (!hasJoined) return;
+    if (data.players.length >= 2) {
+      startContainer.style.display = "block";
+    } else {
+      startContainer.style.display = "none";
+    }
   });
 
   socket.on("game_data", (data) => {
@@ -26,8 +48,6 @@ window.onload = () => {
 
     const gameScreen = document.createElement("div");
     gameScreen.id = "gameScreen";
-    gameScreen.style.textAlign = "center";
-    gameScreen.style.marginTop = "50px";
 
     if (data.role === "chameleon") {
       gameScreen.innerHTML = `
@@ -42,9 +62,8 @@ window.onload = () => {
 
     const timer = document.createElement("h3");
     timer.id = "timer";
-    timer.innerText = "Waiting for everyone to get ready...";
+    timer.innerText = "Waiting for other players...";
     gameScreen.appendChild(timer);
-
     document.body.appendChild(gameScreen);
 
     socket.emit("client_ready");
@@ -76,14 +95,12 @@ window.onload = () => {
   socket.on("player_list", (data) => {
     if (!hasJoined) return;
 
-    const oldVote = document.getElementById("voteContainer");
-    if (oldVote) oldVote.remove();
+    const voteContainer = document.getElementById("voteContainer");
+    if (voteContainer) voteContainer.remove();
 
-    const voteContainer = document.createElement("div");
-    voteContainer.id = "voteContainer";
-    voteContainer.style.textAlign = "center";
-    voteContainer.style.marginTop = "20px";
-    voteContainer.innerHTML = "<h3>Who do you think is the Chameleon?</h3>";
+    const container = document.createElement("div");
+    container.id = "voteContainer";
+    container.innerHTML = "<h3>Who do you think is the Chameleon?</h3>";
 
     data.players.forEach((player) => {
       const btn = document.createElement("button");
@@ -91,12 +108,12 @@ window.onload = () => {
       btn.style.margin = "5px";
       btn.onclick = () => {
         socket.emit("submit_vote", { vote: player });
-        voteContainer.innerHTML = `<p>You voted for <b>${player}</b>. Waiting for others...</p>`;
+        container.innerHTML = `<p>You voted for <b>${player}</b>. Waiting for others...</p>`;
       };
-      voteContainer.appendChild(btn);
+      container.appendChild(btn);
     });
 
-    document.body.appendChild(voteContainer);
+    document.body.appendChild(container);
   });
 
   socket.on("voting_result", (data) => {
@@ -106,8 +123,7 @@ window.onload = () => {
     if (oldVote) oldVote.remove();
 
     const resultDiv = document.createElement("div");
-    resultDiv.style.textAlign = "center";
-    resultDiv.style.marginTop = "20px";
+    resultDiv.style.marginTop = "30px";
     resultDiv.innerHTML = "<h3>Voting Results:</h3>";
 
     for (const [voter, voted] of Object.entries(data.votes)) {
@@ -115,6 +131,13 @@ window.onload = () => {
       line.innerText = `${voter} voted for ${voted}`;
       resultDiv.appendChild(line);
     }
+
+    resultDiv.innerHTML += `<p style="margin-top: 20px;"><strong>The Chameleon was: ${data.chameleon}</strong></p>`;
+
+    const restartBtn = document.createElement("button");
+    restartBtn.innerText = "Restart Game";
+    restartBtn.onclick = () => window.location.reload();
+    resultDiv.appendChild(restartBtn);
 
     document.body.appendChild(resultDiv);
   });
