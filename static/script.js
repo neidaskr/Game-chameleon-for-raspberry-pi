@@ -3,9 +3,6 @@ let hasJoined = false;
 
 window.onload = () => {
   const lobbyDiv = document.getElementById("lobby");
-window.onload = () => {
-  const socket = io();
-
   const nameInput = document.getElementById("nameInput");
   const joinButton = document.getElementById("joinButton");
 
@@ -17,12 +14,10 @@ window.onload = () => {
     }
 
     socket.emit("join", { name });
+    hasJoined = true; // ✅ set correctly
     joinButton.disabled = true;
     nameInput.disabled = true;
   });
-};
-
-
 
   socket.on("game_data", (data) => {
     if (!hasJoined) return;
@@ -81,7 +76,6 @@ window.onload = () => {
   socket.on("player_list", (data) => {
     if (!hasJoined) return;
 
-    // Remove existing vote UI if any
     const oldVote = document.getElementById("voteContainer");
     if (oldVote) oldVote.remove();
 

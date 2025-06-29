@@ -1,56 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Chameleon Lobby</title>
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background: #f5f5f5;
-        }
-        #lobby {
-            display: none;
-            text-align: center;
-        }
-        input, button {
-            padding: 10px;
-            margin: 10px;
-            font-size: 1rem;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            padding: 5px;
-            font-size: 1.1rem;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Chameleon Lobby</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f5f5f5;
+    }
+
+    #lobby {
+      text-align: center;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 1rem;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 5px;
+      font-size: 1.1rem;
+    }
+  </style>
 </head>
 <body>
-    <div id="joinScreen">
-        <h1>Join Game</h1>
-<input type="text" id="nameInput" placeholder="Enter your name" />
-<button id="joinButton">Join</button>
 
-    </div>
+  <!-- Only ONE join screen -->
+  <div id="lobby">
+    <h1>Join Game</h1>
+    <input type="text" id="nameInput" placeholder="Enter your name" />
+    <button id="joinButton">Join</button>
+  </div>
 
-   <div id="lobby" style="text-align:center; margin-top: 100px;">
-  <h2>Join Game</h2>
-<input type="text" id="nameInput" placeholder="Enter your name" />
-<button id="joinButton">Join</button>
-
-
-</div>
-
-    <script src="/static/script.js"></script>
+  <script src="/static/script.js"></script>
 </body>
 </html>

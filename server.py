@@ -1,63 +1,62 @@
 import random
-sid_map = {}
-votes = {}
-ready_clients = set()
-player_data = {}
-
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
-
-
 
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
 
-
+# Global game state
 players = []
 ready_players = set()
+ready_clients = set()
+sid_map = {}  # name -> sid
+player_data = {}  # sid -> name
+votes = {}
+chameleon = None
+secret_word = None
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-sid_map = {}
-
 @socketio.on('join')
 def handle_join(data):
     sid = request.sid
     name = data['name']
-    player_data[sid] = name
-    print(f"{name} joined the game.")
+
     if name in players:
         emit('join_error', {'message': 'Name already taken'})
         return
 
-    players.append(name)
+    player_data[sid] = name
     sid_map[name] = sid
+    players.append(name)
+    print(f"{name} joined the game.")
     emit('player_list', {'players': players}, broadcast=True)
-
-
-
 
 @socketio.on('disconnect')
 def on_disconnect():
-    # Remove player from players and ready_players
-    # Note: This requires tracking username by session, so for now, remove by sid if possible
-    # But since we only have names, we can't reliably remove on disconnect
-    pass  # For a robust solution, track players by sid and name
-    emit('player_list', {'players': players}, broadcast=True)
+    sid = request.sid
+    name = player_data.get(sid)
 
+    if name:
+        print(f"{name} disconnected.")
+        players.remove(name)
+        ready_players.discard(name)
+        sid_map.pop(name, None)
+        player_data.pop(sid, None)
+
+    emit('player_list', {'players': players}, broadcast=True)
 
 @socketio.on('player_ready')
 def on_ready(data):
+    global chameleon, secret_word
     ready_players.add(data['name'])
 
     if len(ready_players) == len(players):
-        # Only start game when everyone is ready
         word_list = ["Pineapple", "Rocket", "Pencil", "Submarine", "Volcano"]
         secret_word = random.choice(word_list)
         chameleon = random.choice(players)
-
         print(f"[Game Start] Word: {secret_word}, Chameleon: {chameleon}")
 
         for player in players:
@@ -67,10 +66,13 @@ def on_ready(data):
             else:
                 socketio.emit('game_data', {'role': 'player', 'word': secret_word}, to=sid)
 
+@socketio.on('client_ready')
+def handle_client_ready():
+    ready_clients.add(request.sid)
 
-if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
-    
+    if len(ready_clients) == len(players):
+        socketio.emit("start_timer")
+
 @socketio.on("request_player_list")
 def send_players():
     emit("player_list", {"players": players})
@@ -78,25 +80,32 @@ def send_players():
 @socketio.on("submit_vote")
 def receive_vote(data):
     voter_sid = request.sid
-    voter_name = None
-    for name, sid in sid_map.items():
-        if sid == voter_sid:
-            voter_name = name
-            break
+    voter_name = player_data.get(voter_sid)
+
+    if not voter_name:
+        print("Vote from unknown player.")
+        return
 
     voted = data["vote"]
     votes[voter_name] = voted
     print(f"{voter_name} voted for {voted}")
 
     if len(votes) == len(players):
-        # All players voted, announce result
-        socketio.emit("voting_result", {"votes": votes})
+        print("All votes received.")
+        socketio.emit("voting_result", {
+            "votes": votes,
+            "chameleon": chameleon  # ✅ reveal Chameleon
+        })
+        reset_game_state()
 
-@socketio.on("client_ready")
-def handle_client_ready():
-    sid = request.sid
-    ready_clients.add(sid)
+def reset_game_state():
+    print("[Resetting game state]")
+    global ready_players, ready_clients, votes, chameleon, secret_word
+    ready_players.clear()
+    ready_clients.clear()
+    votes.clear()
+    chameleon = None
+    secret_word = None
 
-    if len(ready_clients) == len(players):
-        socketio.emit("start_timer")
-
+if __name__ == '__main__':
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
