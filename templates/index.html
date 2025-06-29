@@ -19,20 +19,21 @@
 
     .lobby-card {
       background: #fff;
-      border-radius: 1.2rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-      padding: 2rem 1.5rem 1.5rem 1.5rem;
-      max-width: 340px;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      padding: 1.2rem 1rem;
+      max-width: 300px;
       width: 100%;
       text-align: center;
+      border: 1px solid #e0e0e0;
     }
 
     h1 {
-      font-size: 1.7rem;
-      margin: 0 0 1.2rem 0;
-      color: #333;
+      font-size: 1.2rem;
+      margin: 0 0 0.8rem 0;
+      color: #1a237e;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
     }
 
     input[type="text"] {
@@ -41,20 +42,22 @@
       border: 1px solid #bbb;
       width: 70%;
       font-size: 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.7rem;
       outline: none;
       transition: border 0.2s;
+      color: #1a237e;
+      background: #fff;
     }
 
     input[type="text"]:focus {
-      border: 1.5px solid #4caf50;
+      border: 1.5px solid #1a237e;
     }
 
     #joinButton {
       padding: 0.6rem 1.5rem;
       border: none;
       border-radius: 0.7rem;
-      background: #4caf50;
+      background: #1a237e;
       color: #fff;
       font-size: 1rem;
       font-weight: 600;
@@ -64,18 +67,18 @@
     }
 
     #joinButton:hover {
-      background: #388e3c;
+      background: #3949ab;
     }
 
     #startContainer {
-      margin-top: 1.2rem;
+      margin-top: 10px;
     }
 
     #startButton {
       padding: 0.6rem 1.5rem;
       border: none;
       border-radius: 0.7rem;
-      background: #1976d2;
+      background: #3949ab;
       color: #fff;
       font-size: 1rem;
       font-weight: 600;
@@ -85,13 +88,13 @@
     }
 
     #startButton:hover {
-      background: #0d47a1;
+      background: #1a237e;
     }
 
     #playerList {
       list-style: none;
       padding: 0;
-      margin: 1.2rem 0 0.5rem 0;
+      margin: 0.8rem 0 0.3rem 0;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
@@ -99,8 +102,8 @@
     }
 
     #playerList li {
-      background: #f0f0f0;
-      color: #333;
+      background: #e3e6f3;
+      color: #1a237e;
       border-radius: 0.7rem;
       padding: 0.4rem 1rem;
       font-size: 1rem;
@@ -115,12 +118,12 @@
   </style>
 </head>
 <body>
-  <div class="lobby-card">
-    <h1>Chameleon Lobby</h1>
-    <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off" />
+  <div class="lobby-card" style="padding:1.2rem 1rem; border-radius:0.5rem; box-shadow:0 1px 4px rgba(0,0,0,0.05); border:1px solid #e0e0e0; max-width:300px;">
+    <h1 style="font-size:1.2rem; margin-bottom:0.8rem; font-weight:700; letter-spacing:0.5px; color:#1a237e;">Chameleon Lobby</h1>
+    <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off" style="margin-bottom:0.7rem;" />
     <button id="joinButton">Join</button>
-    <ul id="playerList"></ul>
-    <div id="startContainer" style="margin-top: 20px; display: none;">
+    <ul id="playerList" style="margin:0.8rem 0 0.3rem 0;"></ul>
+    <div id="startContainer" style="margin-top: 10px; display: none;">
       <button id="startButton">Start Game</button>
     </div>
   </div>
