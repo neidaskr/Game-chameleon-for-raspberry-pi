@@ -19,14 +19,48 @@ server.py                # Flask server + Socket.IO
 
 ## Running on Raspberry Pi or Local Network
 1. Install dependencies:
-   ```
-   pip install flask flask-socketio eventlet
-   ```
+```
+  pip install flask flask-socketio eventlet --break-system-packages
+```
 2. Start the server:
-   ```
+```
    python server.py
-   ```
-3. Connect devices to the same Wi-Fi/hotspot and open `http://<raspberry-pi-ip>:5000` in a browser.
+```
+## Or if you want it to auto start:
+```
+  sudo nano /etc/systemd/system/chameleon.service
+```
+1. Paste this in the editor:
+```
+[Unit]
+Description=Chameleon Game Server
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/Game-chameleon-for-raspberry-pi/server.py
+WorkingDirectory=/home/pi/Game-chameleon-for-raspberry-pi
+Restart=always
+User=pi
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+```
+2. Reload systemd and enable the service
+ ```
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable chameleon.service
+sudo systemctl start chameleon.service
+ ```
+3. Check that it's running
+ ```
+sudo systemctl status chameleon.service
+ ```
+You should see “Active: active (running)”.
+
+## to use
+ Connect devices to the same Wi-Fi/hotspot and open `http://<raspberry-pi-ip>:5000` in a browser.
 
 ## Note
-This is only the start screen/lobby. No game logic is included yet.
+More languages coming soon!!!
