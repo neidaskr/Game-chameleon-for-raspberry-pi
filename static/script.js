@@ -275,4 +275,97 @@ window.onload = () => {
     loseDiv.innerHTML = `<h2 style='color:#1a237e; font-size:1.2rem;'>Chameleonas laimėjo!</h2><p style='color:#3949ab;'>Chameleonas buvo: <b>${data.chameleon}</b></p>`;
     document.body.appendChild(loseDiv);
   });
+
+  socket.on("next_voting_round", (data) => {
+    // Remove any previous voting/result screens
+    const oldVote = document.getElementById("voteContainer");
+    if (oldVote) oldVote.remove();
+    const oldRole = document.querySelector('.role-card');
+    if (oldRole) oldRole.remove();
+    // Create voting card for remaining players
+    const voteContainer = document.createElement("div");
+    voteContainer.id = "voteContainer";
+    voteContainer.style.background = "#fff";
+    voteContainer.style.borderRadius = "0.5rem";
+    voteContainer.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)";
+    voteContainer.style.padding = "1.2rem 1rem";
+    voteContainer.style.maxWidth = "300px";
+    voteContainer.style.width = "100%";
+    voteContainer.style.textAlign = "center";
+    voteContainer.style.margin = "40px auto";
+    voteContainer.style.border = "1px solid #e0e0e0";
+    voteContainer.innerHTML = "<h3 style='color:#1a237e; font-size:1.1rem; margin-bottom:1rem;'>Kas, jūsų manymu, yra Chameleonas?</h3>";
+    data.players.forEach((player) => {
+      const btn = document.createElement("button");
+      btn.innerText = player;
+      btn.style.margin = "5px";
+      btn.style.padding = "0.5rem 1.2rem";
+      btn.style.border = "none";
+      btn.style.borderRadius = "0.7rem";
+      btn.style.background = "#3949ab";
+      btn.style.color = "#fff";
+      btn.style.fontSize = "1rem";
+      btn.style.fontWeight = "600";
+      btn.style.cursor = "pointer";
+      btn.style.transition = "background 0.2s";
+      btn.onmouseover = () => btn.style.background = "#1a237e";
+      btn.onmouseout = () => btn.style.background = "#3949ab";
+      btn.onclick = () => {
+        socket.emit("submit_vote", { vote: player });
+        voteContainer.innerHTML = `<p>Jūs balsavote už <b>${player}</b>. Laukiama kitų...</p>`;
+      };
+      voteContainer.appendChild(btn);
+    });
+    document.body.appendChild(voteContainer);
+  });
+
+  socket.on("chameleon_lost", (data) => {
+    document.body.innerHTML = "";
+    const loseDiv = document.createElement("div");
+    loseDiv.style.background = "#fff";
+    loseDiv.style.borderRadius = "0.5rem";
+    loseDiv.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)";
+    loseDiv.style.padding = "1.2rem 1rem";
+    loseDiv.style.maxWidth = "300px";
+    loseDiv.style.width = "100%";
+    loseDiv.style.textAlign = "center";
+    loseDiv.style.margin = "40px auto";
+    loseDiv.style.border = "1px solid #e0e0e0";
+    loseDiv.innerHTML = `<h2 style='color:#1a237e; font-size:1.2rem;'>Chameleonas buvo sugautas!</h2><p style='color:#3949ab;'>Chameleonas buvo: <b>${data.chameleon}</b></p>`;
+    document.body.appendChild(loseDiv);
+  });
+
+  socket.on("discussion_timer", (data) => {
+    // Remove any previous voting/result screens
+    const oldVote = document.getElementById("voteContainer");
+    if (oldVote) oldVote.remove();
+    const oldRole = document.querySelector('.role-card');
+    if (oldRole) oldRole.remove();
+    const oldTie = document.getElementById("tieDiv");
+    if (oldTie) oldTie.remove();
+    // Show discussion timer
+    const discussionDiv = document.createElement("div");
+    discussionDiv.id = "discussionDiv";
+    discussionDiv.style.background = "#fff";
+    discussionDiv.style.borderRadius = "0.5rem";
+    discussionDiv.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)";
+    discussionDiv.style.padding = "1.2rem 1rem";
+    discussionDiv.style.maxWidth = "300px";
+    discussionDiv.style.width = "100%";
+    discussionDiv.style.textAlign = "center";
+    discussionDiv.style.margin = "40px auto";
+    discussionDiv.style.border = "1px solid #e0e0e0";
+    discussionDiv.innerHTML = `<h3 style='color:#1a237e; font-size:1.1rem; margin-bottom:1rem;'>Diskusija: kas yra Chameleonas?</h3><div id='discussionTimer'>${data.seconds}</div>`;
+    document.body.appendChild(discussionDiv);
+    let timeLeft = data.seconds;
+    const timer = document.getElementById("discussionTimer");
+    const discussionCountdown = setInterval(() => {
+      timeLeft--;
+      timer.innerText = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(discussionCountdown);
+        discussionDiv.innerHTML = "<h3 style='color:#1a237e;'>Balsavimas prasideda!</h3>";
+      }
+    }, 1000);
+  });
 };

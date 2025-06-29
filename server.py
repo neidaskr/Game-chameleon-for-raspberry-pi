@@ -1,4 +1,5 @@
 import random
+import threading
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 from collections import Counter
@@ -102,28 +103,36 @@ def submit_vote(data):
         else:
             eliminuotas = daugiausiai[0]
             eliminuoti.add(eliminuotas)
-            # Notify eliminated player
             sid = sid_zemelapis.get(eliminuotas)
             if sid:
                 socketio.emit("eliminated", {}, to=sid)
-            # Check for endgame: only chameleon and one not chameleon left
             aktyvus_po = [v for v in zaidejai if v not in eliminuoti]
-            if len(aktyvus_po) == 2 and chameleonas in aktyvus_po:
-                # Chameleon wins
+            if chameleonas in eliminuoti:
                 for v in aktyvus_po:
                     sid = sid_zemelapis.get(v)
-                    if v == chameleonas:
-                        socketio.emit("chameleon_win", {}, to=sid)
-                    else:
-                        socketio.emit("chameleon_win_others", {"chameleon": chameleonas}, to=sid)
+                    if sid:
+                        socketio.emit("chameleon_lost", {"chameleon": chameleonas}, to=sid)
                 reset_game()
                 return
-            socketio.emit("voting_result", {
-                "votes": balsai,
-                "chameleon": chameleonas,
-                "eliminated": eliminuotas
-            })
-            reset_game()
+            elif len(aktyvus_po) == 1 and aktyvus_po[0] == chameleonas:
+                sid = sid_zemelapis.get(chameleonas)
+                if sid:
+                    socketio.emit("chameleon_win", {}, to=sid)
+                reset_game()
+                return
+            # If a non-chameleon was eliminated, start 60s discussion timer before next voting
+            if eliminuotas != chameleonas:
+                def start_next_voting():
+                    socketio.emit("discussion_timer", {"seconds": 60})
+                    threading.Timer(60, lambda: socketio.emit("next_voting_round", {"players": aktyvus_po})).start()
+                start_next_voting()
+                balsai.clear()
+                pasiruose.clear()
+                return
+            # Otherwise, continue with next voting round
+            balsai.clear()
+            pasiruose.clear()
+            socketio.emit("next_voting_round", {"players": aktyvus_po})
 
 def reset_game():
     global balsai, chameleonas, slaptas_zodis, pasiruose
