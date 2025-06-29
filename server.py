@@ -91,6 +91,19 @@ def submit_vote(data):
     print(f"{balsaves} balsavo už {balsas_uz}")
 
     aktyvus = [v for v in zaidejai if v not in eliminuoti]
+    # --- CHAMELEON AUTO-WIN LOGIC ---
+    if len(aktyvus) == 2 and chameleonas in aktyvus:
+        # Chameleon wins instantly
+        for v in aktyvus:
+            sid = sid_zemelapis.get(v)
+            if sid:
+                if v == chameleonas:
+                    socketio.emit("chameleon_win", {}, to=sid)
+                else:
+                    socketio.emit("chameleon_win_others", {"chameleon": chameleonas}, to=sid)
+        reset_game()
+        return
+    # --- END CHAMELEON AUTO-WIN LOGIC ---
     if len(balsai) == len(aktyvus):
         from collections import Counter
         balsu_sk = Counter(balsai.values())
@@ -108,6 +121,18 @@ def submit_vote(data):
             if sid:
                 socketio.emit("eliminated", {}, to=sid)
             aktyvus_po = [v for v in zaidejai if v not in eliminuoti]
+            # --- CHAMELEON AUTO-WIN LOGIC (after elimination) ---
+            if len(aktyvus_po) == 2 and chameleonas in aktyvus_po:
+                for v in aktyvus_po:
+                    sid = sid_zemelapis.get(v)
+                    if sid:
+                        if v == chameleonas:
+                            socketio.emit("chameleon_win", {}, to=sid)
+                        else:
+                            socketio.emit("chameleon_win_others", {"chameleon": chameleonas}, to=sid)
+                reset_game()
+                return
+            # --- END CHAMELEON AUTO-WIN LOGIC ---
             if chameleonas in eliminuoti:
                 for v in aktyvus_po:
                     sid = sid_zemelapis.get(v)
