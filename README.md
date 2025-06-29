@@ -46,6 +46,8 @@ Environment=PYTHONUNBUFFERED=1
 [Install]
 WantedBy=multi-user.target
 ```
+make sure you're user is pi
+
 2. Reload systemd and enable the service
  ```
 sudo systemctl daemon-reexec
