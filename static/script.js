@@ -11,7 +11,7 @@ window.onload = () => {
   joinButton.addEventListener("click", () => {
     const name = nameInput.value.trim();
     if (!name) {
-      alert("Please enter your name");
+      alert("Įveskite savo vardą");
       return;
     }
 
@@ -64,23 +64,23 @@ window.onload = () => {
     if (data.role === "chameleon") {
       roleCard.innerHTML = `
         <div style="font-size:2.2rem;">🦎</div>
-        <h2 style="color:#1a237e; font-size:1.1rem; font-weight:700;">You are the Chameleon!</h2>
-        <p style="font-size:1rem; color:#3949ab;">Try to blend in and guess the word!</p>
+        <h2 style="color:#1a237e; font-size:1.1rem; font-weight:700;">Jūs esate Chameleonas!</h2>
+        <p style="font-size:1rem; color:#3949ab;">Bandykite atspėti žodį!</p>
       `;
     } else {
       roleCard.innerHTML = `
         <div style="font-size:2.2rem;">🦎</div>
-        <h2 style="color:#1a237e; font-size:1.1rem; font-weight:700;">You are NOT the Chameleon!</h2>
-        <p style="font-size:1rem; color:#3949ab;">The secret word is:</p>
+        <h2 style="color:#1a237e; font-size:1.1rem; font-weight:700;">Jūs nesate Chameleonas!</h2>
+        <p style="font-size:1rem; color:#3949ab;">Slaptas žodis:</p>
         <div style="font-size:1.3rem; font-weight:700; color:#1a237e; margin:1rem 0;">${data.word}</div>
-        <p style="font-size:0.95rem; color:#888;">Keep it secret from the Chameleon!</p>
+        <p style="font-size:0.95rem; color:#888;">Neleiskite Chameleonui sužinoti žodžio!</p>
       `;
     }
 
     // Add timer placeholder
     const timer = document.createElement("h3");
     timer.id = "timer";
-    timer.innerText = "Waiting for others...";
+    timer.innerText = "Laukiama kitų žaidėjų...";
     timer.style.color = "#3949ab";
     roleCard.appendChild(timer);
     document.body.appendChild(roleCard);
@@ -92,19 +92,19 @@ window.onload = () => {
     if (!hasJoined) return;
 
     const timer = document.getElementById("timer");
-    timer.innerText = "Game starts in 10 seconds...";
+    timer.innerText = "Žaidimas prasidės po 10 sekundžių...";
 
     setTimeout(() => {
       let timeLeft = 60;
-      timer.innerText = `Time left: ${timeLeft}s`;
+      timer.innerText = `Likęs laikas: ${timeLeft}s`;
 
       const countdown = setInterval(() => {
         timeLeft--;
         if (timeLeft > 0) {
-          timer.innerText = `Time left: ${timeLeft}s`;
+          timer.innerText = `Likęs laikas: ${timeLeft}s`;
         } else {
           clearInterval(countdown);
-          timer.innerText = "Time is up!";
+          timer.innerText = "Laikas baigėsi!";
           socket.emit("request_player_list");
         }
       }, 1000);
@@ -117,7 +117,7 @@ window.onload = () => {
 
     const voteContainer = document.createElement("div");
     voteContainer.id = "voteContainer";
-    voteContainer.innerHTML = "<h3>Who do you think is the Chameleon?</h3>";
+    voteContainer.innerHTML = "<h3>Kas, jūsų manymu, yra Chameleonas?</h3>";
 
     data.players.forEach((player) => {
       const btn = document.createElement("button");
@@ -125,7 +125,7 @@ window.onload = () => {
       btn.style.margin = "5px";
       btn.onclick = () => {
         socket.emit("submit_vote", { vote: player });
-        voteContainer.innerHTML = `<p>You voted for <b>${player}</b>. Waiting for others...</p>`;
+        voteContainer.innerHTML = `<p>Jūs balsavote už <b>${player}</b>. Laukiama kitų...</p>`;
       };
       voteContainer.appendChild(btn);
     });
@@ -141,18 +141,18 @@ window.onload = () => {
 
     const resultDiv = document.createElement("div");
     resultDiv.style.marginTop = "30px";
-    resultDiv.innerHTML = "<h3>Voting Results:</h3>";
+    resultDiv.innerHTML = "<h3>Balsavimo rezultatai:</h3>";
 
     for (const [voter, voted] of Object.entries(data.votes)) {
       const line = document.createElement("p");
-      line.innerText = `${voter} voted for ${voted}`;
+      line.innerText = `${voter} balsavo už ${voted}`;
       resultDiv.appendChild(line);
     }
 
-    resultDiv.innerHTML += `<p style="margin-top: 20px;"><strong>The Chameleon was: ${data.chameleon}</strong></p>`;
+    resultDiv.innerHTML += `<p style="margin-top: 20px;"><strong>Chameleonas buvo: ${data.chameleon}</strong></p>`;
 
     const restartBtn = document.createElement("button");
-    restartBtn.innerText = "Restart Game";
+    restartBtn.innerText = "Pradėti iš naujo";
     restartBtn.onclick = () => window.location.reload();
     resultDiv.appendChild(restartBtn);
 
