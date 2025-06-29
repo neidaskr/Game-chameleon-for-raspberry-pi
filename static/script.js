@@ -365,6 +365,12 @@ window.onload = () => {
       if (timeLeft <= 0) {
         clearInterval(discussionCountdown);
         discussionDiv.innerHTML = "<h3 style='color:#1a237e;'>Balsavimas prasideda!</h3>";
+        // Fallback: request voting round if server event is missed
+        setTimeout(() => {
+          if (!document.getElementById("voteContainer")) {
+            socket.emit("request_player_list");
+          }
+        }, 1200);
       }
     }, 1000);
   });

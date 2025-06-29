@@ -1,5 +1,6 @@
 import random
 import threading
+import eventlet
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 from collections import Counter
@@ -124,7 +125,9 @@ def submit_vote(data):
             if eliminuotas != chameleonas:
                 def start_next_voting():
                     socketio.emit("discussion_timer", {"seconds": 60})
-                    threading.Timer(60, lambda: socketio.emit("next_voting_round", {"players": aktyvus_po})).start()
+                    def after_timer():
+                        socketio.emit("next_voting_round", {"players": aktyvus_po})
+                    eventlet.spawn_after(60, after_timer)
                 start_next_voting()
                 balsai.clear()
                 pasiruose.clear()
