@@ -78,7 +78,11 @@ def submit_game_mode_vote(data):
         pasirinktas = rez.most_common(1)[0][0]
         game_mode = pasirinktas
         socketio.emit("game_mode_selected", {"mode": game_mode})
-        start_real_game()
+        # Pradėti žaidimą po 5 sekundžių
+        def delayed_start():
+            eventlet.sleep(5)
+            start_real_game()
+        eventlet.spawn(delayed_start)
 
 def start_real_game():
     global chameleonas, slaptas_zodis, game_mode
