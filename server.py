@@ -106,6 +106,8 @@ def start_real_game():
         else:
             socketio.emit("game_data", {"role": "player", "word": slaptas_zodis, "mode": game_mode}, room=sid)
     print(f"Žaidimas prasidėjo: {slaptas_zodis}, Chameleonas: {chameleonas}")
+    # Pradėti žaidimo laikmatį visiems po rolių išdavimo
+    socketio.emit("start_timer")
 
 @socketio.on("make_guess")
 def handle_guess(data):
