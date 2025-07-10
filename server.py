@@ -149,6 +149,12 @@ def handle_toggle_ready():
         pasiruose.add(sid)
     emit("player_list", {'players': zaidejai, 'eliminated': list(eliminuoti)}, broadcast=True)
 
+@socketio.on("start_timer_done")
+def handle_start_timer_done():
+    # Kai klientas praneša, kad laikmatis baigėsi, pradėti balsavimą visiems
+    # Siunčiamas voting_phase su žaidėjų sąrašu
+    socketio.emit("voting_phase", {"players": zaidejai})
+
 def main():
     socketio.run(app, host="0.0.0.0", port=5000)
 

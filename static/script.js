@@ -170,10 +170,8 @@ window.onload = () => {
 
   socket.on("start_timer", () => {
     if (!hasJoined) return;
-
     const timer = document.getElementById("timer");
     timer.innerText = "Žaidimas prasidės po 10 sekundžių...";
-
     setTimeout(() => {
       let timeLeft = 60;
       timer.innerText = `Likęs laikas: ${timeLeft}s`;
@@ -185,7 +183,8 @@ window.onload = () => {
         } else {
           clearInterval(countdown);
           timer.innerText = "Laikas baigėsi!";
-          socket.emit("request_player_list");
+          // Pranešti serveriui, kad laikas baigėsi
+          socket.emit("start_timer_done");
         }
       }, 1000);
     }, 10000);
