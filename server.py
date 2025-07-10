@@ -155,6 +155,46 @@ def handle_start_timer_done():
     # Siunčiamas voting_phase su žaidėjų sąrašu
     socketio.emit("voting_phase", {"players": zaidejai})
 
+@socketio.on("submit_vote")
+def handle_submit_vote(data):
+    global balsai
+    sid = request.sid
+    vardas = zaidejo_duomenys.get(sid)
+    if not vardas or vardas in eliminuoti:
+        return
+    balsas = data.get("vote")
+    if balsas not in zaidejai or balsas in eliminuoti:
+        return
+    if not hasattr(handle_submit_vote, "votes"):
+        handle_submit_vote.votes = {}
+    handle_submit_vote.votes[vardas] = balsas
+    # Kai visi gyvi žaidėjai prabalsavo, skaičiuojam rezultatus
+    gyvi = [z for z in zaidejai if z not in eliminuoti]
+    if len(handle_submit_vote.votes) == len(gyvi):
+        balsai = handle_submit_vote.votes.copy()
+        # Suskaičiuoti balsus
+        balsuotos = list(balsai.values())
+        if balsuotos:
+            from collections import Counter
+            rez = Counter(balsuotos)
+            daugiausia = rez.most_common(1)[0][1]
+            top = [k for k, v in rez.items() if v == daugiausia]
+            if len(top) > 1:
+                # Lygiosios
+                socketio.emit("tie_vote")
+            else:
+                eliminuotas = top[0]
+                eliminuoti.add(eliminuotas)
+                socketio.emit("player_eliminated", {"player": eliminuotas})
+                # Pranešti rezultatus
+                socketio.emit("voting_result", {"votes": balsai, "chameleon": chameleonas})
+                # Patikrinti ar žaidimas baigėsi
+                if eliminuotas == chameleonas:
+                    socketio.emit("chameleon_lost", {"chameleon": chameleonas})
+                elif len(gyvi) - 1 <= 2:
+                    socketio.emit("chameleon_win_others", {"chameleon": chameleonas})
+        handle_submit_vote.votes = {}
+
 def main():
     socketio.run(app, host="0.0.0.0", port=5000)
 
