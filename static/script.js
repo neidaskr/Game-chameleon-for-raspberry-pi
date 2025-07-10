@@ -134,22 +134,26 @@ window.onload = () => {
     const oldModeInfo = document.getElementById("modeInfoDiv");
     if (oldModeInfo) oldModeInfo.remove();
 
-    if (data.role === "chameleon" && data.word) {
-      // Chameleonas su žodžiu
+    if (data.role === "chameleon") {
+      // Chameleonas (su žodžiu arba be žodžio)
+      let wordHtml = "";
+      if (data.word) {
+        wordHtml = `<p style="font-size:1rem; color:#3949ab;">Jūsų žodis:</p><div style="font-size:1.3rem; font-weight:700; color:#1a237e; margin:1rem 0;">${data.word}</div><p style="font-size:0.95rem; color:#888;">Bandykite atspėti tikrąjį žodį!</p>`;
+      } else {
+        wordHtml = `<p style='font-size:1rem; color:#3949ab;'>Jūs nežinote žodžio!</p><p style='font-size:0.95rem; color:#888;'>Bandykite išsiaiškinti žodį pagal kitų užuominas.</p>`;
+      }
       roleCard.innerHTML = `
         <div style="font-size:2.2rem;">🦎</div>
         <h2 style="color:#1a237e; font-size:1.1rem; font-weight:700;">Jūs esate Chameleonas!</h2>
-        <p style="font-size:1rem; color:#3949ab;">Jūsų žodis:</p>
-        <div style="font-size:1.3rem; font-weight:700; color:#1a237e; margin:1rem 0;">${data.word}</div>
-        <p style="font-size:0.95rem; color:#888;">Bandykite atspėti tikrąjį žodį!</p>
+        ${wordHtml}
       `;
     } else {
+      // Paprastas žaidėjas
       roleCard.innerHTML = `
-        <div style="font-size:2.2rem;">🦎</div>
-        <h2 style="color:#1a237e; font-size:1.1rem; font-weight:700;">Jūs nesate Chameleonas!</h2>
+        <div style="font-size:2.2rem;">🧑‍🤝‍🧑</div>
+        <h2 style="color:#1a237e; font-size:1.1rem; font-weight:700;">Jūs nesate Chameleonas</h2>
         <p style="font-size:1rem; color:#3949ab;">Slaptas žodis:</p>
         <div style="font-size:1.3rem; font-weight:700; color:#1a237e; margin:1rem 0;">${data.word}</div>
-        <p style="font-size:0.95rem; color:#888;">Neleiskite Chameleonui sužinoti žodžio!</p>
       `;
     }
 
