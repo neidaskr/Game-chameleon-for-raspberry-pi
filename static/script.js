@@ -27,6 +27,74 @@ window.onload = () => {
     startContainer.style.display = "none";
   });
 
+  // --- GAME MODE VOTE ---
+  socket.on("game_mode_vote", (data) => {
+    // Remove lobby card if present
+    const lobbyCard = document.querySelector('.lobby-card');
+    if (lobbyCard) lobbyCard.remove();
+    // Remove any previous game mode vote UI
+    const oldModeDiv = document.getElementById("gameModeDiv");
+    if (oldModeDiv) oldModeDiv.remove();
+    // Show game mode vote UI
+    const modeDiv = document.createElement("div");
+    modeDiv.id = "gameModeDiv";
+    modeDiv.style.background = "#fff";
+    modeDiv.style.borderRadius = "0.5rem";
+    modeDiv.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)";
+    modeDiv.style.padding = "1.2rem 1rem";
+    modeDiv.style.maxWidth = "300px";
+    modeDiv.style.width = "100%";
+    modeDiv.style.textAlign = "center";
+    modeDiv.style.margin = "40px auto";
+    modeDiv.style.border = "1px solid #e0e0e0";
+    modeDiv.innerHTML = `<h3 style='color:#1a237e; font-size:1.1rem; margin-bottom:1rem;'>Išsirinkite žaidimo rėžimą:</h3>`;
+    data.modes.forEach((mode) => {
+      const btn = document.createElement("button");
+      btn.innerText = mode;
+      btn.style.margin = "5px";
+      btn.style.padding = "0.5rem 1.2rem";
+      btn.style.border = "none";
+      btn.style.borderRadius = "0.7rem";
+      btn.style.background = "#3949ab";
+      btn.style.color = "#fff";
+      btn.style.fontSize = "1rem";
+      btn.style.fontWeight = "600";
+      btn.style.cursor = "pointer";
+      btn.style.transition = "background 0.2s";
+      btn.onmouseover = () => btn.style.background = "#1a237e";
+      btn.onmouseout = () => btn.style.background = "#3949ab";
+      btn.onclick = () => {
+        // Disable all buttons after vote
+        Array.from(modeDiv.querySelectorAll('button')).forEach(b => b.disabled = true);
+        btn.style.background = "#1a237e";
+        btn.innerText = "Balsas priimtas";
+        socket.emit("submit_game_mode_vote", { mode });
+      };
+      modeDiv.appendChild(btn);
+    });
+    document.body.appendChild(modeDiv);
+  });
+
+  socket.on("game_mode_selected", (data) => {
+    // Remove game mode vote UI
+    const oldModeDiv = document.getElementById("gameModeDiv");
+    if (oldModeDiv) oldModeDiv.remove();
+    // Show info about selected mode
+    const infoDiv = document.createElement("div");
+    infoDiv.id = "modeInfoDiv";
+    infoDiv.style.background = "#fff";
+    infoDiv.style.borderRadius = "0.5rem";
+    infoDiv.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)";
+    infoDiv.style.padding = "1.2rem 1rem";
+    infoDiv.style.maxWidth = "300px";
+    infoDiv.style.width = "100%";
+    infoDiv.style.textAlign = "center";
+    infoDiv.style.margin = "40px auto";
+    infoDiv.style.border = "1px solid #e0e0e0";
+    infoDiv.innerHTML = `<h3 style='color:#1a237e; font-size:1.1rem;'>Pasirinktas rėžimas:</h3><p style='color:#3949ab; font-size:1.1rem; font-weight:600;'>${data.mode}</p><p>Laukiama žaidimo pradžios...</p>`;
+    document.body.appendChild(infoDiv);
+  });
+
   socket.on("join_error", (data) => {
     alert(data.message);
     joinButton.disabled = false;
@@ -62,11 +130,18 @@ window.onload = () => {
     roleCard.style.margin = "40px auto";
     roleCard.style.border = "1px solid #e0e0e0";
 
-    if (data.role === "chameleon") {
+    // Pašalinti rėžimo info, jei yra
+    const oldModeInfo = document.getElementById("modeInfoDiv");
+    if (oldModeInfo) oldModeInfo.remove();
+
+    if (data.role === "chameleon" && data.word) {
+      // Chameleonas su žodžiu
       roleCard.innerHTML = `
         <div style="font-size:2.2rem;">🦎</div>
         <h2 style="color:#1a237e; font-size:1.1rem; font-weight:700;">Jūs esate Chameleonas!</h2>
-        <p style="font-size:1rem; color:#3949ab;">Bandykite atspėti žodį!</p>
+        <p style="font-size:1rem; color:#3949ab;">Jūsų žodis:</p>
+        <div style="font-size:1.3rem; font-weight:700; color:#1a237e; margin:1rem 0;">${data.word}</div>
+        <p style="font-size:0.95rem; color:#888;">Bandykite atspėti tikrąjį žodį!</p>
       `;
     } else {
       roleCard.innerHTML = `
