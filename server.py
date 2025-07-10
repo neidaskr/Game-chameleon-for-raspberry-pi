@@ -100,11 +100,11 @@ def start_real_game():
                 # Parinkti panašų žodį (kitą iš sąrašo, kuris nėra slaptas_zodis)
                 galimi = [z for z in zodziu_sarasas if z != slaptas_zodis]
                 panasus = random.choice(galimi) if galimi else "?"
-                emit("game_start", {"chameleonas": chameleonas, "slaptas_zodis": panasus, "mode": game_mode}, room=sid)
+                emit("game_data", {"role": "chameleon", "word": panasus, "mode": game_mode}, room=sid)
             else:
-                emit("game_start", {"chameleonas": chameleonas, "slaptas_zodis": "?", "mode": game_mode}, room=sid)
+                emit("game_data", {"role": "chameleon", "word": None, "mode": game_mode}, room=sid)
         else:
-            emit("game_start", {"chameleonas": chameleonas, "slaptas_zodis": slaptas_zodis, "mode": game_mode}, room=sid)
+            emit("game_data", {"role": "player", "word": slaptas_zodis, "mode": game_mode}, room=sid)
     print(f"Žaidimas prasidėjo: {slaptas_zodis}, Chameleonas: {chameleonas}")
 
 @socketio.on("make_guess")
