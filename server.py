@@ -187,7 +187,7 @@ def handle_submit_vote(data):
                 eliminuoti.add(eliminuotas)
                 socketio.emit("player_eliminated", {"player": eliminuotas})
                 # Pranešti rezultatus
-                socketio.emit("voting_result", {"votes": balsai, "chameleon": chameleonas})
+                socketio.emit("voting_result", {"votes": balsai, "chameleon": chameleonas, "eliminated": eliminuotas, "chameleon_found": False})
                 # Patikrinti ar žaidimas baigėsi
                 if eliminuotas == chameleonas:
                     socketio.emit("chameleon_lost", {"chameleon": chameleonas})

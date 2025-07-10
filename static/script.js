@@ -256,7 +256,11 @@ window.onload = () => {
       resultDiv.appendChild(line);
     }
 
-    resultDiv.innerHTML += `<p style="margin-top: 20px;"><strong>Chameleonas buvo: ${data.chameleon}</strong></p>`;
+    if (data.eliminated && data.eliminated !== data.chameleon) {
+      resultDiv.innerHTML += `<p style='color:#d32f2f; margin-top: 20px;'><strong>Chameleonas vis dar tarp jūsų! Išbalsuotas žaidėjas: ${data.eliminated}</strong></p>`;
+    } else {
+      resultDiv.innerHTML += `<p style="margin-top: 20px;"><strong>Chameleonas buvo: ${data.chameleon}</strong></p>`;
+    }
 
     const restartBtn = document.createElement("button");
     restartBtn.innerText = "Pradėti iš naujo";
