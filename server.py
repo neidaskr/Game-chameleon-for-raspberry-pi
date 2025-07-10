@@ -96,3 +96,55 @@ def start_real_game():
                 # Parinkti panašų žodį (kitą iš sąrašo, kuris nėra slaptas_zodis)
                 galimi = [z for z in zodziu_sarasas if z != slaptas_zodis]
                 panasus = random.choice(galimi) if galimi else "?"
+                emit("game_start", {"chameleonas": chameleonas, "slaptas_zodis": panasus, "mode": game_mode}, room=sid)
+            else:
+                emit("game_start", {"chameleonas": chameleonas, "slaptas_zodis": "?", "mode": game_mode}, room=sid)
+        else:
+            emit("game_start", {"chameleonas": chameleonas, "slaptas_zodis": slaptas_zodis, "mode": game_mode}, room=sid)
+    print(f"Žaidimas prasidėjo: {slaptas_zodis}, Chameleonas: {chameleonas}")
+
+@socketio.on("make_guess")
+def handle_guess(data):
+    global eliminuoti
+    sid = request.sid
+    vardas = zaidejo_duomenys.get(sid)
+    if not vardas or vardas == chameleonas:
+        return
+    spėjimas = data.get("guess")
+    if spėjimas == slaptas_zodis:
+        # Teisingas spėjimas, žaidėjas laimi
+        emit("guess_result", {"success": True, "message": "Teisingai! Žodis buvo: " + slaptas_zodis})
+        # Visi kiti žaidėjai eliminuojami
+        for zaidejas in zaidejai:
+            if zaidejas != chameleonas:
+                sid = sid_zemelapis[zaidejas]
+                emit("player_eliminated", {"player": zaidejas}, room=sid)
+                eliminuoti.add(zaidejas)
+        # Chameleonas laimi
+        sid = sid_zemelapis[chameleonas]
+        emit("game_won", {"winner": chameleonas}, room=sid)
+        print(f"Žaidimą laimėjo {chameleonas} su žodžiu {slaptas_zodis}!")
+    else:
+        emit("guess_result", {"success": False, "message": "Neteisingas spėjimas."})
+
+@socketio.on("get_player_data")
+def handle_get_player_data():
+    sid = request.sid
+    vardas = zaidejo_duomenys.get(sid)
+    if vardas:
+        emit("player_data", {"name": vardas, "eliminated": vardas in eliminuoti, "ready": sid in pasiruose})
+
+@socketio.on("toggle_ready")
+def handle_toggle_ready():
+    sid = request.sid
+    if sid in pasiruose:
+        pasiruose.remove(sid)
+    else:
+        pasiruose.add(sid)
+    emit("player_list", {'players': zaidejai, 'eliminated': list(eliminuoti)}, broadcast=True)
+
+def main():
+    socketio.run(app, host="0.0.0.0", port=5000)
+
+if __name__ == "__main__":
+    main()
