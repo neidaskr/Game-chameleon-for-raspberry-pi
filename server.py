@@ -95,110 +95,17 @@ def start_real_game():
 
         "Mango", "Palydovas", "Rašiklis", "Laivas", "Vulkanas", "Kalendorius", "Kokosas", "Planšetė", "Žurnalas", "Suolas", "Taburetė", "Stiklas", "Vartai", "Išmanusis", "Motociklas", "Paspirtukas", "Autobusas", "Sraigtasparnis", "Metro", "Jachta", "Šlepetė", "Šalmas", "Katinas", "Triušis", "Gaidys", "Vėžys", "Krūmas", "Tulipanas", "Samanos", "Ledinukas", "Rūkas", "Žibintas", "Saturnas", "Kometa", "Rūkas", "Liepsna", "Upė", "Sniegas", "Mamutai", "Tigras", "Leopardas", "Barsukas", "Šernas", "Šakalys", "Žebenkštis", "Žiurkėnas", "Žaltys", "Garnys", "Balandis", "Žąsis", "Kregždė", "Karvelis", "Putpelė", "Žąsis", "Ožys", "Briedis", "Elnias", "Stumbras", "Višta", "Asilas", "Mulė", "Kupranugaris", "Mandrilas", "Orangutanas", "Okapė", "Antilopė", "Lama", "Alpaka", "Jūrų liūtas", "Jūrų arkliukas", "Marlinas", "Kardžuvė", "Koralas", "Krabas", "Sepija", "Jūrų žvaigždė", "Širšė", "Bitė", "Termitas", "Skorpionas", "Laumžirgis", "Avietė", "Gervuogė", "Spanguolė", "Šermukšnis", "Obuolys", "Kriaušė", "Slyva", "Vyšnia", "Braškė", "Mėlynė", "Serbentas", "Vynuogė", "Arbūzas", "Melionas", "Citrina", "Apelsinas", "Mandarinas", "Greipfrutas", "Kivis", "Persikas", "Abrikosas", "Granatas", "Figas", "Datulė", "Kokosas", "Riešutas", "Migdolas", "Lazdynas", "Pistacija", "Saulėgrąža", "Pastarnokas", "Ridikas", "Topinambas", "Salota", "Moliūgas", "Baklažanas", "Cukinija", "Paprika", "Pomidoras", "Svogūnas", "Poras", "Česnakas", "Krapai", "Petražolė", "Salieras", "Špinatai", "Ropė", "Ridikėlis", "Žirnis", "Pupelė", "Lęšis", "Kukurūzas", "Sorgas", "Grikiai", "Aviža", "Kviečiai", "Rugiai", "Miežiai", "Bagetė", "Riestainis", "Keksiukas", "Biskvitas", "Pyragaitis", "Tortas", "Pyragėlis", "Meduolis", "Sirupas", "Varškė", "Grietinėlė", "Sviestas", "Kefyras", "Kiaušinienė", "Salami", "Šoninė", "Vištiena", "Kiauliena", "Jautiena", "Aviena", "Menke", "Lašiša", "Starkis", "Karšis", "Ešerys", "Lynas", "Lydeka", "Ungurys", "Silkė", "Šamas", "Krevetė", "Midija", "Austrė", "Kalmarai", "Sepija", "Espresso", "Žalioji arbata", "Obuolių sultys", "Mineralinis", "Gazuotas vanduo", "Margarita", "Sidras", "Portveinas", "Prosecco", "Tekila", "Grappa", "Armanjakas", "Burbonas", "Romas", "Vermutai", "Karamelė", "Jogurtiniai ledai", "Glajus", "Druska", "Pipirai", "Ciberžolė", "Muskatas", "Kardamonas", "Kmynai", "Majonezas", "Kečupas", "Aliejus", "Actas", "Sojos padažas", "Tagliatelle", "Fusilli", "Lazanja", "Focaccia", "Hotdogas", "Tostas", "Krekeris", "Bulvių plokštainis", "Keptuvė", "Puodas", "Arbatinukas", "Lėkštė", "Puodelis", "Stiklinė", "Šakutė", "Peilis", "Šaukštas", "Šaukštelis", "Servetėlė", "Staltiesė", "Taburetė", "Rašomasis stalas", "Fotelis", "Dvivietė lova", "Spintelė", "Komoda", "Lentynėlė", "Veidrodis", "Kilimėlis", "Užuolaida", "Lemputė", "Šviestuvas", "Monitorius", "Radijo imtuvas", "Nešiojamas kompiuteris", "E-knygų skaityklė", "Išmanusis laikrodis", "Žadintuvas", "Veidrodinis fotoaparatas", "Web kamera", "Projektorius", "Kolonėlė", "Ausinės", "Mikrofonas", "Pultelis", "Baterija", "Pakrovėjas", "Laidas", "Jungiklis", "Lizdas", "Lemputė", "Ventiliatorius", "Šildytuvas", "Kondicionierius", "Šaldytuvas", "Šaldiklis", "Orkaitė", "Mikrobangė", "Virdulys", "Skrudintuvas", "Plaktuvas", "Virtuvė", "Vonios kambarys", "Tualetas", "Dušas", "Vonia", "Bidė", "Kosmetinis veidrodis", "Rankšluostis", "Muilinė", "Kondicionierius", "Dantų siūlas", "Burnos skalavimo skystis", "Barzdaskutė", "Plaukų tiesintuvas", "Šukos", "Kremas", "Losjonas", "Dezodorantas", "Kvepalai", "Lūpų balzamas", "Akių pieštukas", "Pudra", "Šešėliai", "Nagų lakas", "Nagų dildė", "Nagų žnyplutės", "Pincetas", "Žirklės", "Adatėlė", "Siūlas", "Sagos", "Smeigtukas", "Smeigtukai", "Diržas", "Kepurė", "Šalikas", "Pirštinės", "Batai", "Šlepetės", "Kojinės", "Pėdkelnės", "Kelnės", "Šortai", "Sijonas", "Suknelė", "Marškiniai", "Palaidinė", "Megztinis", "Striukė", "Paltas", "Liemenė", "Kostiumas", "Švarkas", "Kaklaraištis", "Maudymosi šortai", "Naktiniai", "Chalatas", "Akiniai nuo saulės", "Kepuraitė", "Kelioninis krepšys", "Lagaminas", "Rankinė", "Piniginė", "Raktų ryšulys", "Raktų pakabukas", "Laikrodis", "Žiedas", "Auskarai", "Vėrinys", "Apyrankė", "Segtukas", "Plaukų segtukas", "Plaukų gumytė", "Romanas", "Komiksas", "Dienraštis", "Užrašų knyga", "Užrašų lapelis", "Flomasteris", "Pieštukas", "Trintukas", "Liniuotė", "Skaičiuotuvas", "Popierius", "Aplankas", "Segtuvas", "Lipni juosta", "Klijai", "Žirklės", "Sąvaržėlė", "Spaustukas", "Dėžutė", "Dėklas", "Krepšys", "Dėžė", "Dėžutė", "Vokas", "Atvirukas", "Laiškas", "Paštas", "Pašto ženklas", "Siunta", "Dovana", "Žaislas", "Lėlė", "Meškiukas", "Mašinėlė", "Konstruktorius", "Lego", "Galvosūkis", "Stalo žaidimas", "Kamuolys", "Šokdynė", "Dviračio ratai", "Riedlentė", "Riedučiai", "Pačiūžos", "Snieglentė", "Slidės", "Rogutės", "Palapinė", "Miegmaišis", "Kuprinė", "Žibintuvėlis", "Kompasas", "Žemėlapis", "Peilis"
     ]
+    if len(zodziu_sarasas) != len(chameleon_zodziai):
+        print(f"KLAIDA: zodziu_sarasas ilgis={len(zodziu_sarasas)}, chameleon_zodziai ilgis={len(chameleon_zodziai)}")
     for zaidejas in zaidejai:
         sid = sid_zemelapis[zaidejas]
         if zaidejas == chameleonas:
             if game_mode == "Chameleonas su žodžiu":
-                # Parinkti panašų žodį (kitą iš sąrašo, kuris nėra slaptas_zodis)
-                galimi = [z for z in zodziu_sarasas if z != slaptas_zodis]
-                panasus = random.choice(galimi) if galimi else "?"
-                socketio.emit("game_data", {"role": "chameleon", "word": panasus, "mode": game_mode}, room=sid)
-            else:
-                socketio.emit("game_data", {"role": "chameleon", "word": None, "mode": game_mode}, room=sid)
-        else:
-            socketio.emit("game_data", {"role": "player", "word": slaptas_zodis, "mode": game_mode}, room=sid)
-    print(f"Žaidimas prasidėjo: {slaptas_zodis}, Chameleonas: {chameleonas}")
-    # Pradėti žaidimo laikmatį visiems po rolių išdavimo
-    socketio.emit("start_timer")
-
-@socketio.on("make_guess")
-def handle_guess(data):
-    global eliminuoti
-    sid = request.sid
-    vardas = zaidejo_duomenys.get(sid)
-    if not vardas or vardas == chameleonas:
-        return
-    spėjimas = data.get("guess")
-    if spėjimas == slaptas_zodis:
-        # Teisingas spėjimas, žaidėjas laimi
-        emit("guess_result", {"success": True, "message": "Teisingai! Žodis buvo: " + slaptas_zodis})
-        # Visi kiti žaidėjai eliminuojami
-        for zaidejas in zaidejai:
-            if zaidejas != chameleonas:
-                sid = sid_zemelapis[zaidejas]
-                emit("player_eliminated", {"player": zaidejas}, room=sid)
-                eliminuoti.add(zaidejas)
-        # Chameleonas laimi
-        sid = sid_zemelapis[chameleonas]
-        emit("game_won", {"winner": chameleonas}, room=sid)
-        print(f"Žaidimą laimėjo {chameleonas} su žodžiu {slaptas_zodis}!")
-    else:
-        emit("guess_result", {"success": False, "message": "Neteisingas spėjimas."})
-
-@socketio.on("get_player_data")
-def handle_get_player_data():
-    sid = request.sid
-    vardas = zaidejo_duomenys.get(sid)
-    if vardas:
-        emit("player_data", {"name": vardas, "eliminated": vardas in eliminuoti, "ready": sid in pasiruose})
-
-@socketio.on("toggle_ready")
-def handle_toggle_ready():
-    sid = request.sid
-    if sid in pasiruose:
-        pasiruose.remove(sid)
-    else:
-        pasiruose.add(sid)
-    emit("player_list", {'players': zaidejai, 'eliminated': list(eliminuoti)}, broadcast=True)
-
-@socketio.on("start_timer_done")
-def handle_start_timer_done():
-    # Kai klientas praneša, kad laikmatis baigėsi, pradėti balsavimą visiems
-    # Siunčiamas voting_phase su žaidėjų sąrašu
-    socketio.emit("voting_phase", {"players": zaidejai})
-
-@socketio.on("submit_vote")
-def handle_submit_vote(data):
-    global balsai
-    sid = request.sid
-    vardas = zaidejo_duomenys.get(sid)
-    if not vardas or vardas in eliminuoti:
-        return
-    balsas = data.get("vote")
-    if balsas not in zaidejai or balsas in eliminuoti:
-        return
-    if not hasattr(handle_submit_vote, "votes"):
-        handle_submit_vote.votes = {}
-    handle_submit_vote.votes[vardas] = balsas
-    # Kai visi gyvi žaidėjai prabalsavo, skaičiuojam rezultatus
-    gyvi = [z for z in zaidejai if z not in eliminuoti]
-    if len(handle_submit_vote.votes) == len(gyvi):
-        balsai = handle_submit_vote.votes.copy()
-        # Suskaičiuoti balsus
-        balsuotos = list(balsai.values())
-        if balsuotos:
-            from collections import Counter
-            rez = Counter(balsuotos)
-            daugiausia = rez.most_common(1)[0][1]
-            top = [k for k, v in rez.items() if v == daugiausia]
-            if len(top) > 1:
-                # Lygiosios
-                socketio.emit("tie_vote")
-            else:
-                eliminuotas = top[0]
-                eliminuoti.add(eliminuotas)
-                socketio.emit("player_eliminated", {"player": eliminuotas})
-                # Pranešti rezultatus
-                socketio.emit("voting_result", {"votes": balsai, "chameleon": chameleonas, "eliminated": eliminuotas, "chameleon_found": False})
-                # Patikrinti ar žaidimas baigėsi
-                if eliminuotas == chameleonas:
-                    socketio.emit("chameleon_lost", {"chameleon": chameleonas})
-                elif len(gyvi) - 1 <= 2:
-                    socketio.emit("chameleon_win_others", {"chameleon": chameleonas})
-        handle_submit_vote.votes = {}
-
-def main():
-    socketio.run(app, host="0.0.0.0", port=5000)
-
-if __name__ == "__main__":
-    main()
+                if len(zodziu_sarasas) != len(chameleon_zodziai):
+                    socketio.emit("game_data", {"role": "chameleon", "word": "KLAIDA: sąrašų ilgiai nesutampa", "mode": game_mode}, room=sid)
+                else:
+                    try:
+                        idx = zodziu_sarasas.index(slaptas_zodis)
+                        cham_word = chameleon_zodziai[idx]
+                    except Exception:
+                        cham_word = "?"
