@@ -109,3 +109,8 @@ def start_real_game():
                         cham_word = chameleon_zodziai[idx]
                     except Exception:
                         cham_word = "?"
+        else:
+            socketio.emit("game_data", {"role": "player", "word": slaptas_zodis, "mode": game_mode}, room=sid)
+
+if __name__ == "__main__":
+    socketio.run(app, host="0.0.0.0", port=5000)
