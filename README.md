@@ -29,4 +29,4 @@ server.py                # Flask server + Socket.IO
 3. Connect devices to the same Wi-Fi/hotspot and open `http://<raspberry-pi-ip>:5000` in a browser.
 
 ## Note
-This is only the start screen/lobby. No game logic is included yet.
+This is only a demo. Any help would be great 😃 
